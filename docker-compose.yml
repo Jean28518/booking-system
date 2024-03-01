@@ -1,0 +1,26 @@
+version: '3.7'
+
+services:
+  django_gunicorn:
+    restart: unless-stopped
+    volumes:
+      - ./src/django:/app
+      - ./docker-entrypoint.sh:/docker-entrypoint.sh
+      - static:/static
+    image: python:3.12-alpine
+    entrypoint: sh /docker-entrypoint.sh
+
+  caddy:
+    restart: unless-stopped
+    ports:
+      - "10324:80"
+    volumes:
+      - ./src/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./caddy_data:/data
+      - ./caddy_config:/config
+      - static:/static
+    image: caddy:latest
+
+  
+volumes:
+  static:

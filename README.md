@@ -1,5 +1,12 @@
 # booking-system
 
+## How to run in production
+
+```bash
+git clone https://github.com/Jean28518/booking-system.git
+cd booking-system
+docker-compose up -d
+```
 
 ## How to develop
 
