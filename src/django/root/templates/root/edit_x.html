@@ -1,0 +1,64 @@
+{% extends "root/base.html" %}
+{% block content %}
+
+<h2> Bearbeite {{ name }} </h2>
+
+{% if description %} {{ description | safe }} <br> <br> {% endif %}
+
+{% if message != "" %}
+<p><strong>{{ message | safe }}</strong></p>
+{% endif %}
+
+{% if delete_url %}
+<button class="contrast outline"
+data-target="modal-deletion"
+onClick="toggleModal(event)">
+LÖSCHEN
+</button>
+{% endif %}
+
+<form method="post" enctype="multipart/form-data">
+    <div class="grid">
+        <div>
+            <a href="{{url}}"role="button" class="secondary" style="display: block;">Zurück</a>
+        </div>
+        <input type="submit" value="Speichern">
+    </div>
+    {{ form }}
+    <br><br>
+    <div class="grid">
+        <div>
+            <a href="{{url}}"role="button" class="secondary" style="display: block;">Zurück</a>
+        </div>
+        <input type="submit" value="Speichern">
+    </div>
+</form>
+
+
+{% comment %} Confirmation for deletion {% endcomment %}
+<dialog id="modal-deletion">
+    <article>
+        <a href="#close"
+        aria-label="Close"
+        class="close"
+        data-target="modal-deletion"
+        onClick="toggleModal(event)">
+        </a>
+        <h3>{{name}} wirklich löschen?</h3>
+        <p>
+        Dieser Vorgang ist nicht mehr umkehrbar!
+        </p>
+        <footer>
+        <a href="#cancel"
+            role="button"
+            class="secondary"
+            data-target="modal-deletion"
+            onClick="toggleModal(event)">
+            Abbrechen
+        </a>
+        <a href="{{delete_url}}"role="button" class="contrast" style="height: 50px">LÖSCHEN</a>
+        </footer>
+    </article>
+</dialog>
+    
+{% endblock %}

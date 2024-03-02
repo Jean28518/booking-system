@@ -13,10 +13,6 @@ def quarter_to_time(quarter):
 def get_free_slots(events, start_time: datetime.datetime, end_time: datetime.datetime):
     """Returns a list of days, which is containing a list of free quarters for each day."""
 
-    # for event in events:
-    #     if "Schwimmen" in event["summary"]:
-    #         print(event)
-
     # Remove all events which beginnings and endings are outside the time frame and keep only these which are marked as busy
     events = [event for event in events if event["start"] < end_time and event["end"] > start_time and event["busy"]]
 
@@ -62,8 +58,8 @@ def print_days_with_free_slots(days):
         print(line)
 
 
-events = caldav.get_all_caldav_events("https://caldav.fastmail.com/dav/calendars/username/username/", "username", "password")
-# Start: Today 00:00, End: in 7 days
-today_0_0 = datetime.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-days = get_free_slots(events, today_0_0, today_0_0 + datetime.timedelta(days=6, hours=23, minutes=59, seconds=59, microseconds=999999))
-print_days_with_free_slots(days)
+# events = caldav.get_all_caldav_events("https://caldav.fastmail.com/dav/calendars/username/username/", "username", "password")
+# # Start: Today 00:00, End: in 7 days
+# today_0_0 = datetime.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+# days = get_free_slots(events, today_0_0, today_0_0 + datetime.timedelta(days=6, hours=23, minutes=59, seconds=59, microseconds=999999))
+# print_days_with_free_slots(days)
