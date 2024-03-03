@@ -18,17 +18,19 @@ LÖSCHEN
 {% endif %}
 
 <form method="post" enctype="multipart/form-data">
-    <div class="grid">
-        <div>
-            <a href="{{url}}"role="button" class="secondary" style="display: block;">Zurück</a>
+    {% if display_buttons_at_top %}
+        <div class="grid">
+            <div>
+                <a href="{{back}}"role="button" class="secondary" style="display: block;">Zurück</a>
+            </div>
+            <input type="submit" value="Speichern">
         </div>
-        <input type="submit" value="Speichern">
-    </div>
+    {% endif %}
     {{ form }}
-    <br><br>
+    <br>
     <div class="grid">
         <div>
-            <a href="{{url}}"role="button" class="secondary" style="display: block;">Zurück</a>
+            <a href="{{back}}"role="button" class="secondary" style="display: block;">Zurück</a>
         </div>
         <input type="submit" value="Speichern">
     </div>

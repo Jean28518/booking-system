@@ -2,8 +2,6 @@ import httplib2
 import base64
 import datetime
 from dateutil.relativedelta import relativedelta
-from icalendar import Calendar, Event
-import re
 from urllib.parse import unquote
 
 

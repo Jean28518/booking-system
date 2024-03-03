@@ -1,0 +1,35 @@
+{% extends "root/base.html" %}
+{% block content %}
+
+<br>
+<br>
+<br>
+<center>
+<h2>Ticket erstellt!</h2>
+
+<p>Schicke diesen Link an den Kunden, damit er einen Termin vereinbaren kann:</p>
+
+<p>
+    <div id="link" style="text-decoration: underline">{{share_url}}</a><br></div>
+    <small id="message">Auf den Link klicken, um Link in die Zwischenablage zu kopieren.</small>
+</p>
+
+</center>
+
+<script>
+// Copy to clipboard
+document.getElementById('link').style.cursor = 'pointer';
+document.getElementById('link').addEventListener('click', function(e) {
+    e.preventDefault();
+    var text = this.textContent;
+    var input = document.createElement('input');
+    input.value = text;
+    document.body.appendChild(input);
+    input.select();
+    document.execCommand('copy');
+    document.body.removeChild(input);
+    document.getElementById('message').textContent = 'Link wurde in die Zwischenablage kopiert!';
+});
+</script>
+
+{% endblock %}

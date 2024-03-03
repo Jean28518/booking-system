@@ -1,3 +1,5 @@
 django
 gunicorn
 Pillow
+httplib2
+python-dateutil

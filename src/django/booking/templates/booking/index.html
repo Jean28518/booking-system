@@ -1,6 +1,107 @@
 {% extends "root/base.html" %}
 {% block content %}
-<h1>Hello World</h1>
 
-Test
+<h2>Ticket erstellen</h2>
+<form method="post">
+    <label for="description">Beschreibung (nur Du siehst diese Beschreibung):</label>
+    <input type="text" name="name" id="name" value="{{default_name}}" required/>
+    <div class="grid">
+        <div>
+            <label for="start_date">Frühestes Datum für einen Termin:</label>
+            <input type="date" name="start_date" id="start_date" aria-label="Date" value={{start_date}} required />
+        </div>
+
+        <div>
+            <label for="expiry_date">Ablaufdatum des Tickets:</label>
+            <input type="date" name="expiry_date" id="expiry_date" aria-label="Date" value={{expiry_date}} required />
+        </div>
+    </div>
+    <input type="hidden" name="duration" id="duration"  value="30" />
+    
+    <div role="group" class="button-group">
+        <button type="button" class="secondary" data-value="15">15 min</button>
+        <button type="button" class="secondary" data-value="30" aria-current="true">30 min</button>
+        <button type="button" class="secondary" data-value="45">45 min</button>
+        <button type="button" class="secondary" data-value="60">60 min</button>
+        <button type="button" class="secondary" data-value="90">90 min</button>
+        <select name="duration_select" aria-label="Select" style="width: 20%" id="duration_select" on>
+            <option selected disabled value="" >Andere Dauer auswählen</option>
+            <option value="75">75 min</option>
+            <option value="105">105 min</option>
+            <option value="120">120 min (2 Stunden)</option>
+            <option value="135">135 min</option>
+            <option value="150">150 min (2,5 Stunden)</option>
+            <option value="180">180 min (3 Stunden)</option>
+            <option value="210">210 min (3,5 Stunden)</option>
+            <option value="240">240 min (4 Stunden)</option>
+            <option value="270">270 min (4,5 Stunden)</option>
+            <option value="300">300 min (5 Stunden)</option>
+            <option value="330">330 min (5,5 Stunden)</option>
+            <option value="360">360 min (6 Stunden)</option>
+            <option value="390">390 min (6,5 Stunden)</option>
+            <option value="420">420 min (7 Stunden)</option>
+            <option value="450">450 min (7,5 Stunden)</option>
+            <option value="480">480 min (8 Stunden)</option>
+        </select>
+    </div>
+
+    <label for="create_jitsi_link">Jitsi-Link erstellen</label>
+    <input type="checkbox" name="create_jitsi_link" id="create_jitsi_link" value="on"/> <br> <br>
+
+    <input type="submit" value="Ticket erstellen"/>
+       
+</form>
+
+<script>
+
+// callback function
+function selectedOption(value) {
+    document.getElementById('duration').value = value;
+    // for loop to remove aria-current from all buttons
+    const buttons = document.querySelectorAll('.button-group button');
+    buttons.forEach(button => {
+        if (button.getAttribute('aria-current'))
+            button.removeAttribute('aria-current');
+    });  
+}
+
+const selectElement = document.getElementById("duration_select");
+selectElement.addEventListener("change", function() {
+    // Call your function here passing the selectedOption as an argument
+    selectedOption(this.value);
+});
+
+
+
+
+
+{% comment %} # Hello World: {% endcomment %}
+console.log('Hello World');
+
+const buttons = document.querySelectorAll('.button-group button');
+
+// Event-Listener für jeden Button hinzufügen
+buttons.forEach(button => {
+button.addEventListener('click', () => {
+// Aktuell ausgewählten Button ermitteln
+const currentButton = document.querySelector('.button-group button[aria-current="true"]');
+
+// Wert des neuen Buttons im input mit der id "duration" speichern
+document.getElementById('duration').value = button.dataset.value;
+
+if (currentButton) {
+    // aria-current Attribut vom aktuellen Button entfernen
+    currentButton.removeAttribute('aria-current');
+}
+
+// aria-current Attribut auf neuen Button setzen
+button.setAttribute('aria-current', 'true');
+
+// Reset select
+document.getElementById('duration_select').selectedIndex = 0;
+});
+});
+</script>
+
+
 {% endblock %}

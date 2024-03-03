@@ -4,7 +4,7 @@
 {% if heading %}
 <h2>{{ heading }}</h2>
 {% else %}
-<h2> Erstelle {{ type }} </h2>
+<h2> Erstelle {{ element_name }} </h2>
 {% endif %}
 
 {% if message != "" %}
@@ -12,21 +12,19 @@
 {% endif %}
 
 <form method="post" enctype="multipart/form-data">
-    {% if hide_buttons_top %}
-    
-    {% else %}
+    {% if display_buttons_at_top %}
         <div class="grid">
             <div>
-                <a href="{{url}}"role="button" class="secondary" style="display: block;">Zurück</a>
+                <a href="{{back}}"role="button" class="secondary" style="display: block;">Zurück</a>
             </div>
             <input type="submit" value="Erstellen">
         </div>
     {% endif %}
     {{ form }}
-    <br><br>
+    <br>
     <div class="grid">
         <div>
-            <a href="{{url}}"role="button" class="secondary" style="display: block;">Zurück</a>
+            <a href="{{back}}"role="button" class="secondary" style="display: block;">Zurück</a>
         </div>
         <input type="submit" value="Erstellen">
     </div>

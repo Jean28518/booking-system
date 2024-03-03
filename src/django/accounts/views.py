@@ -108,21 +108,16 @@ def change_password_view(request):
 def profile_view(request):
     message = ""
     user = request.user
-    print(user.profile)
     if request.method == "POST":
         profile_form = forms.ProfileForm(request.POST, request.FILES)
         if profile_form.is_valid():
-            print("HUHU")
             user.first_name = profile_form.cleaned_data["first_name"]
             user.last_name = profile_form.cleaned_data["last_name"]
             user.email = profile_form.cleaned_data["email"]
             user.profile.phone = profile_form.cleaned_data["phone"]
-            print(request.FILES)
-            print(request.POST)
             if request.FILES.get("picture"):
                 path = handle_uploaded_file(request.FILES["picture"], user.username)
                 user.profile.picture = path
-                print(path)
             if request.POST.get("picture-clear"):
                 user.profile.picture = ""
             user.profile.save()

@@ -1,6 +1,8 @@
 import datetime
 # import caldav
 import booking.caldav as caldav
+from booking.models import Calendar
+import uuid
 
 def time_to_quarter(time):
     return time.hour * 4 + time.minute // 15
@@ -63,3 +65,27 @@ def print_days_with_free_slots(days):
 # today_0_0 = datetime.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
 # days = get_free_slots(events, today_0_0, today_0_0 + datetime.timedelta(days=6, hours=23, minutes=59, seconds=59, microseconds=999999))
 # print_days_with_free_slots(days)
+        
+
+def set_main_calendar_for_user(user, calendar):
+    """Sets the main calendar for a user. If the user already has a main calendar, all other calendars are set to not main calendar."""
+    all_calendars = Calendar.objects.filter(assigned_user=user)
+    for cal in all_calendars:
+        if cal == calendar:
+            cal.main_calendar = True
+        else:
+            cal.main_calendar = False
+        cal.save()
+
+
+def get_main_calendar_for_user(user):
+    """Returns the main calendar for a user. Otherwise None."""
+    all_calendars = Calendar.objects.filter(assigned_user=user)
+    for cal in all_calendars:
+        if cal.main_calendar:
+            return cal
+    return None
+
+
+def generate_guid():
+    return str(uuid.uuid4())
