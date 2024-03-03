@@ -3,6 +3,9 @@ import datetime
 import booking.caldav as caldav
 from booking.models import Calendar
 import uuid
+from .models import Ticket, BookingSettings
+import booking.booking as booking
+import locale
 
 def time_to_quarter(time):
     return time.hour * 4 + time.minute // 15
@@ -10,6 +13,10 @@ def time_to_quarter(time):
 
 def quarter_to_time(quarter):
     return datetime.time(quarter // 4, (quarter % 4) * 15)
+
+
+def is_quarter_15_or_45(quarter):
+    return quarter % 4 == 3 or quarter % 4 == 1
 
 
 def get_free_slots(events, start_time: datetime.datetime, end_time: datetime.datetime):
@@ -46,6 +53,137 @@ def get_free_slots(events, start_time: datetime.datetime, end_time: datetime.dat
                 elif start_day < day["date"] < end_day:
                     day["free_slots"] = []
     return days
+
+def get_available_slots_for_ticket(ticket):
+    """Returns a list of weeks, which is containing a list of days, which is containing available slots for the ticket."""
+    # Get all calendars of the user
+    calendars = Calendar.objects.filter(assigned_user=ticket.assigned_user)
+    # Get all events of all the calendars
+    events = []
+    for cal in calendars:
+        events += caldav.get_all_caldav_events(cal.url, cal.username, cal.password)
+    # Convert the first_available_date to a datetime object
+    first_possible_datetime = datetime.datetime.combine(ticket.first_available_date, datetime.time(0, 0))
+    if first_possible_datetime < datetime.datetime.now():
+        first_possible_datetime = datetime.datetime.now() + datetime.timedelta(minutes=15)
+    days = get_free_slots(events, first_possible_datetime, datetime.datetime.now() + datetime.timedelta(days=BookingSettings.objects.get(assigned_user=ticket.assigned_user).maximum_future_booking_time))
+    print_days_with_free_slots(days)
+    duration = ticket.duration
+    # Make sure that duration is in a 15 minute interval, e.g. 17 minutes will be extended to 30 minutes
+    if duration.seconds % 900 != 0:
+        duration = duration + datetime.timedelta(seconds=900 - duration.seconds % 900)
+    # Get duration in quarters
+    duration_in_quarters = duration.seconds // 900
+    # Remove all days which are not in the future
+    days = [day for day in days if day["date"] >= datetime.datetime.now().date()]
+    
+    settings = booking.get_booking_settings_for_user(ticket.assigned_user)
+    earliest_booking_time = settings.earliest_booking_time
+    latest_booking_end = settings.latest_booking_end
+    
+    # Remove all slots which are not in the time frame between earliest_booking_time and latest_booking_end
+    for day in days:
+        day["free_slots"] = [slot for slot in day["free_slots"] if quarter_to_time(slot) >= earliest_booking_time and quarter_to_time(slot) < latest_booking_end]
+    
+    for day in days:
+        # Now generate a list of available slots.
+        # Each available slot should respect the duration of the ticket and latest_booking_end
+        # Also make sure that all free_slots are available for the duration of the ticket
+        day["slots"] = []
+
+        # Find all clusters of free slots we will sort out the short ones later
+        available_clusters = []
+        while len(day["free_slots"]) > 0:
+            start = day["free_slots"].pop(0)
+            end = start
+            while end + 1 in day["free_slots"]:
+                end += 1
+                day["free_slots"].remove(end)
+            available_clusters.append(range(start, end + 1))
+        # Now let's sort out the clusters which are too short
+        available_clusters = [cluster for cluster in available_clusters if len(cluster) >= duration_in_quarters]
+
+        # Now lets create a list of available slots
+        # For that we remove the amount of quarters of the duration from the end of the cluster
+        for cluster in available_clusters:
+            cluster = cluster[:-duration_in_quarters + 1]
+            for slot in cluster:
+                day["slots"].append(slot)
+
+        # Now we should be finished with the slot finding
+                
+        # If there are more options than 5 we remove all slots which are either at :15, or :45
+        if len(day["slots"]) > 5:
+            day["slots"] = [slot for slot in day["slots"] if not is_quarter_15_or_45(slot)]
+                
+        # Lets convert the slots to dicts with start, end 
+        new_slots = []
+        for slot in day["slots"]:
+            new_slots.append({"start": quarter_to_time(slot), "end": quarter_to_time(slot + duration_in_quarters)})
+        day["slots"] = new_slots
+
+        # Generate a good looking title for the day in german
+        locale.setlocale(locale.LC_ALL, 'de_DE.UTF-8')
+        day["title"] = day["date"].strftime("%A, %d.%m.%Y")
+        # If day is today, add "Heute" to the title
+        if day["date"] == datetime.datetime.now().date():
+            day["title"] = "Heute, " + day["title"]
+        # If day is tomorrow, add "Morgen" to the title
+        if day["date"] == datetime.datetime.now().date() + datetime.timedelta(days=1):
+            day["title"] = "Morgen, " + day["title"]
+    
+    # Now generate a list of weeks
+    # Make sure, the first week also has 7 days
+    # If the first day is not a monday, add empty days to the beginning
+    weeks = []
+    current_week = []
+    empty_day = {"date": None, "slots": []}
+    for day in days:
+        if not day["date"].weekday() == 0 and len(current_week) == 0:
+            for i in range(day["date"].weekday()):
+                current_week.append(empty_day)
+        current_week.append(day)
+        if len(current_week) == 7:
+            weeks.append(current_week)
+            current_week = []
+
+    # If the last week is not full, add empty days to the end
+    if len(current_week) > 0:
+        for i in range(7 - len(current_week)):
+            current_week.append(empty_day)
+        weeks.append(current_week)
+
+    # Now we check, which days are excluded by the user in the settings:
+    if settings.sunday == False:
+        for week in weeks:
+            week.pop(6)
+    if settings.saturday == False:
+        for week in weeks:
+            week.pop(5)
+    if settings.friday == False:
+        for week in weeks:
+            week.pop(4)
+    if settings.thursday == False:
+        for week in weeks:
+            week.pop(3)
+    if settings.wednesday == False:
+        for week in weeks:
+            week.pop(2)
+    if settings.tuesday == False:
+        for week in weeks:
+            week.pop(1)
+    if settings.monday == False:
+        for week in weeks:
+            week.pop(0)
+
+    # Now if a week is empty, we remove it
+    weeks = [week for week in weeks if not all([day["date"] == None for day in week])]
+
+    return weeks
+            
+    
+
+
 
 
 def print_days_with_free_slots(days):
@@ -89,3 +227,5 @@ def get_main_calendar_for_user(user):
 
 def generate_guid():
     return str(uuid.uuid4())
+
+

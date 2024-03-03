@@ -1,0 +1,34 @@
+{% extends "root/base.html" %}
+{% block content %}
+
+{% for week in weeks %}
+<div class="grid">
+    {% for day in week %}
+        {% if day.empty %}
+            <div></div>
+        {% else %}
+            <div>
+                <center>
+                <strong style="font-size: 0.9rem;">{{ day.title }}</strong>
+                
+                <div style="padding-top: 0.5rem;">
+                    {% for slot in day.slots %}
+                        <a href="{% url 'select_slot' ticket.guid day.date slot.start %}" role="button" class="secondary" style="padding: 0.4rem; margin: 0.2rem; font-size: 0.8rem;">{{ slot.start|date:"H:i" }} - {{ slot.end|date:"H:i" }} Uhr</a>
+                    {% endfor %}
+                    {% if day.slots|length == 0 %}
+                        <p>Keine freien Termine</p>
+                    {% endif %}
+                </div>
+                </center>
+            </div>
+        {% endif %}
+
+    {% endfor %}
+</div>
+<hr>
+<br>
+{% endfor %}
+
+
+
+{% endblock %}

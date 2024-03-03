@@ -8,7 +8,8 @@ import datetime
 from .models import Calendar, Ticket
 import booking.forms as forms
 import booking.calendar
-import booking.booking as booking
+import booking.caldav
+import booking.booking
 
 
 
@@ -108,7 +109,8 @@ def delete_calendar(request, calendar_id):
 
 def ticket_customer_view(request, guid):
     ticket = Ticket.objects.get(guid=guid)
-    return render(request, "booking/ticket_customer_view.html", {"ticket": ticket})
+    weeks = booking.calendar.get_available_slots_for_ticket(ticket)
+    return render(request, "booking/select_slot.html", {"weeks": weeks, "ticket": ticket})
 
 
 @login_required()
@@ -168,7 +170,7 @@ def edit_ticket(request, guid):
 
 @login_required()
 def booking_settings(request):
-    settings = booking.get_booking_settings_for_user(request.user)
+    settings = booking.booking.get_booking_settings_for_user(request.user)
     message = ""
     form = forms.BookingSettingsForm(instance=settings)
     if request.method == "POST":
@@ -182,3 +184,25 @@ def booking_settings(request):
             message = "Fehler beim Bearbeiten der Einstellungen."
 
     return render(request, 'root/generic_form.html', {"title": "Buchungseinstellungen", "form": form, "back": reverse("index"), "message": message, "submit": "Speichern", "display_buttons_at_top": True})
+
+    
+def select_slot(request, guid, date, start_time):
+    ticket = Ticket.objects.get(guid=guid)
+    start_time = datetime.datetime.strptime(start_time, "%H:%M:%S").time()
+    date = datetime.datetime.strptime(date, "%Y-%m-%d").date()
+
+    if request.method == "POST":
+        # Check if the selected slot is still available
+        if not booking.calendar.is_slot_available(ticket, date, start_time):
+            return templates.message(request, "Ein Fehler ist aufgetreten. Bitte wählen Sie einen anderen Slot.", "ticket_customer_view", [guid])
+        # ticket.current_date = datetime.datetime.combine(date, start_time)
+        # ticket.save()
+        booking.calendar.book_slot(ticket, date, start_time)
+        return redirect("ticket_customer_view", guid=guid)
+
+    start_time_display = start_time.strftime("%H:%M")
+    date_display = date.strftime("%d.%m.%Y")
+    duration_display = ticket.duration.seconds // 60
+    return render(request, "booking/booking_confirmation.html", {"ticket": ticket, "date": date, "start_time": start_time, "start_time_display": start_time_display, "date_display": date_display, "duration_display": duration_display})
+
+    pass

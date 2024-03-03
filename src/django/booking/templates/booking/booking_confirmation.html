@@ -1,0 +1,24 @@
+{% extends "root/base.html" %}
+{% block content %}
+
+<br><br>
+
+<center>
+<h2>Termin bestätigen</h2>
+
+<strong>Termin:</strong> {{ date_display }} um {{ start_time_display }} Uhr<br>
+<strong>Dauer:</strong> {{ duration_display }} Minuten<br>
+
+<form style="padding: 2rem;">
+    <input type="hidden" name="date" value="{{ date }}">
+    <input type="hidden" name="start_time" value="{{ start_time }}">
+    <input type="hidden" name="guid" value="{{ ticket.guid }}">
+    <div class="">
+        <div style="display: inline;">
+            <a href="{% url "ticket_customer_view" ticket.guid %}"role="button" class="secondary" style="width: 8rem;">Zurück</a>
+        </div>
+        <input style="display: inline; width: 15rem;" type="submit" value="Termin jetzt bestätigen">
+    </div>
+</form>
+</center>
+{% endblock %}
