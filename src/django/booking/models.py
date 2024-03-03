@@ -7,8 +7,8 @@ from django.contrib.auth.models import User
 class Calendar(models.Model):
     name = models.CharField(max_length=200)
     url = models.URLField(max_length=200)
-    username = models.CharField(max_length=200)
-    password = models.CharField(max_length=200)
+    username = models.CharField(max_length=200, null=True, blank=True)
+    password = models.CharField(max_length=200, null=True, blank=True)
     assigned_user = models.ForeignKey(User, on_delete=models.CASCADE)
     main_calendar = models.BooleanField(default=False)
 

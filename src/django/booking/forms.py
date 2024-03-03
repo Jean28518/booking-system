@@ -9,15 +9,15 @@ class CalendarForm(forms.ModelForm):
         labels = {
             'name': 'Name',
             'url': 'CalDAV-URL',
-            'username': 'Username',
-            'password': 'Password',
-            'main_calendar': 'Main Calendar',
+            'username': 'Benutzername',
+            'password': 'Passwort',
+            'main_calendar': 'Hauptkalender',
         }
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'url': forms.URLInput(attrs={'class': 'form-control'}),
             'username': forms.TextInput(attrs={'class': 'form-control'}),
-            'password': forms.PasswordInput(attrs={'class': 'form-control'}),
+            'password': forms.TextInput(attrs={'class': 'form-control'}),
             'main_calendar': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 
