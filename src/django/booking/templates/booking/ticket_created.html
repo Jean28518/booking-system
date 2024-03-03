@@ -7,12 +7,23 @@
 <center>
 <h2>Ticket erstellt!</h2>
 
-<p>Schicke diesen Link an den Kunden, damit er einen Termin vereinbaren kann:</p>
+<strong>Beschreibung:</strong> {{ticket.name}}<br>
+<strong>Frühester Termin:</strong> {{ticket.first_available_date}}<br>
+<strong>Dauer:</strong> {{ticket.duration}}
 
-<p>
-    <div id="link" style="text-decoration: underline">{{share_url}}</a><br></div>
+<br>
+<br>
+
+    Schicke diesen Link an den Kunden, damit er einen Termin vereinbaren kann:
+    <div id="link" style="text-decoration: underline">{{share_url}}<br></div>
     <small id="message">Auf den Link klicken, um Link in die Zwischenablage zu kopieren.</small>
-</p>
+
+
+<br>
+<br>
+<br>
+
+<a href="{% url "index" %}" role="button">Zurück zur Startseite</a>
 
 </center>
 

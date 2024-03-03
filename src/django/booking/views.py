@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
@@ -8,6 +8,7 @@ import datetime
 from .models import Calendar, Ticket
 import booking.forms as forms
 import booking.calendar
+import booking.booking as booking
 
 
 
@@ -113,6 +114,11 @@ def ticket_customer_view(request, guid):
 @login_required()
 def tickets(request):
     tickets = Ticket.objects.filter(assigned_user=request.user)
+    tickets = list(tickets)
+    # Sort tickets by creation. The newest ticket should be on top.
+    # (The id is automatically incremented by the database, so we can use this as a timestamp for the creation date.)
+    tickets.sort(key=lambda x: x.id, reverse=True)
+    print(tickets)
     overview = templates.process_overview_dict({
         "heading": "Tickets",
         "element_name": "Ticket",
@@ -132,7 +138,7 @@ def tickets(request):
 def delete_ticket(request, guid):
     ticket = Ticket.objects.get(guid=guid)
     ticket.delete()
-    return render(request, "root/message.html", {"message": "Ticket gelöscht", "url": reverse("tickets")})
+    return redirect("tickets")
 
 
 @login_required()
@@ -158,3 +164,21 @@ def edit_ticket(request, guid):
         else:
             message = "Fehler beim Bearbeiten des Tickets"
     return render(request, 'root/edit_x.html', {"name": ticket.name, "form": form, "back": reverse("tickets"), "message": message})
+
+
+@login_required()
+def booking_settings(request):
+    settings = booking.get_booking_settings_for_user(request.user)
+    message = ""
+    form = forms.BookingSettingsForm(instance=settings)
+    if request.method == "POST":
+        form = forms.BookingSettingsForm(request.POST, instance=settings)
+        if form.is_valid():
+            settings = form.save(commit=False)
+            settings.assigned_user = request.user
+            settings.save()
+            message = "Änderungen abgespeichert."
+        else:
+            message = "Fehler beim Bearbeiten der Einstellungen."
+
+    return render(request, 'root/generic_form.html', {"title": "Buchungseinstellungen", "form": form, "back": reverse("index"), "message": message, "submit": "Speichern", "display_buttons_at_top": True})
