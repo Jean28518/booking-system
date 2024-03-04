@@ -1,0 +1,23 @@
+<center>
+{% if ticket.assigned_user.profile.picture %}
+  <div style="display: block; padding: 0 1rem;">
+      <img style="width: 6rem" src="{{ ticket.assigned_user.profile.picture.url }}">
+  </div>
+{% endif %}
+
+<div style="display: block;">
+    {% if ticket.assigned_user.first_name or ticket.assigned_user.last_name %}
+        <h2 style="text-align: center; margin: 0; padding: 0.3rem 0 0.5rem 0;">{{ ticket.assigned_user.first_name }} {{ ticket.assigned_user.last_name }}</h2>
+    {% endif %}
+    {% if ticket.assigned_user.profile.phone %}
+       {{ ticket.assigned_user.profile.phone }}<br>
+    {% endif %}
+    {% if ticket.assigned_user.email %}
+        {% comment %} {{ ticket.assigned_user.email }}<br> {% endcomment %}
+        <a href="mailto:{{ ticket.assigned_user.email }}">{{ ticket.assigned_user.email }}</a><br>
+    {% endif %}
+</div>
+<div style="clear: both;"></div>
+<div style="height: 1rem;"></div>
+
+</center>

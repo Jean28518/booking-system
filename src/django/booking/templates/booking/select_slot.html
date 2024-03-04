@@ -1,6 +1,10 @@
 {% extends "root/base.html" %}
 {% block content %}
 
+{% include "booking/profile.html" %}
+
+<h2 style="margin: 0.5rem, 0;">Termin wählen</h2>
+
 {% for week in weeks %}
 <div class="grid">
     {% for day in week %}

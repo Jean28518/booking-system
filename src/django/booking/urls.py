@@ -15,8 +15,12 @@ urlpatterns = [
     path("edit_ticket/<str:guid>/", views.edit_ticket, name="edit_ticket"),
 
     path("ticket/<str:guid>/", views.ticket_customer_view, name="ticket_customer_view"),
+    path("customer_cancel_ticket/<str:guid>/", views.customer_cancel_ticket, name="customer_cancel_ticket"),
+    path("customer_change_date/<str:guid>/", views.customer_change_date, name="customer_change_date"),
+
 
     path("settings/", views.booking_settings, name="booking_settings"),
 
     path("select_slot/<str:guid>/<str:date>/<str:start_time>/", views.select_slot, name="select_slot"),
+
 ]

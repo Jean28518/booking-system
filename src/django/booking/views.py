@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.conf import settings
 import root.templates as templates
 import datetime
+import pytz
 
 from .models import Calendar, Ticket
 import booking.forms as forms
@@ -109,6 +110,11 @@ def delete_calendar(request, calendar_id):
 
 def ticket_customer_view(request, guid):
     ticket = Ticket.objects.get(guid=guid)
+    if ticket.current_date:
+        date_display = ticket.current_date.strftime("%d.%m.%Y")
+        start_time_display = ticket.current_date.strftime("%H:%M")
+        duration_display = ticket.duration.seconds // 60
+        return render(request, "booking/ticket_customer_view.html", {"ticket": ticket, "date_display": date_display, "start_time_display": start_time_display, "duration_display": duration_display})
     weeks = booking.calendar.get_available_slots_for_ticket(ticket)
     return render(request, "booking/select_slot.html", {"weeks": weeks, "ticket": ticket})
 
@@ -187,17 +193,19 @@ def booking_settings(request):
 
     
 def select_slot(request, guid, date, start_time):
+    print("HUHUU")
     ticket = Ticket.objects.get(guid=guid)
     start_time = datetime.datetime.strptime(start_time, "%H:%M:%S").time()
     date = datetime.datetime.strptime(date, "%Y-%m-%d").date()
 
     if request.method == "POST":
+        print("POST")
         # Check if the selected slot is still available
-        if not booking.calendar.is_slot_available(ticket, date, start_time):
-            return templates.message(request, "Ein Fehler ist aufgetreten. Bitte wählen Sie einen anderen Slot.", "ticket_customer_view", [guid])
-        # ticket.current_date = datetime.datetime.combine(date, start_time)
-        # ticket.save()
-        booking.calendar.book_slot(ticket, date, start_time)
+        # if not booking.calendar.is_slot_available(ticket, date, start_time):
+        #     return templates.message(request, "Ein Fehler ist aufgetreten. Bitte wählen Sie einen anderen Slot.", "ticket_customer_view", [guid])
+        ticket.current_date = datetime.datetime.combine(date, start_time)
+        ticket.save()
+        # booking.calendar.book_slot(ticket, date, start_time)
         return redirect("ticket_customer_view", guid=guid)
 
     start_time_display = start_time.strftime("%H:%M")
@@ -205,4 +213,12 @@ def select_slot(request, guid, date, start_time):
     duration_display = ticket.duration.seconds // 60
     return render(request, "booking/booking_confirmation.html", {"ticket": ticket, "date": date, "start_time": start_time, "start_time_display": start_time_display, "date_display": date_display, "duration_display": duration_display})
 
-    pass
+
+def customer_cancel_ticket(request, guid):
+    booking.calendar.remove_booking(guid)
+    return templates.message(request, "Termin erfolgreich storniert. Wenn Sie den Termin doch wahrnehmen wollen, werden Sie nun wieder zur Buchungs-Seite weitergeleitet.", "ticket_customer_view", [guid])
+
+
+def customer_change_date(request, guid):
+    booking.calendar.remove_booking(guid)
+    return redirect("ticket_customer_view", guid=guid)

@@ -9,7 +9,7 @@
 <strong>Termin:</strong> {{ date_display }} um {{ start_time_display }} Uhr<br>
 <strong>Dauer:</strong> {{ duration_display }} Minuten<br>
 
-<form style="padding: 2rem;">
+<form style="padding: 2rem;" method="post">
     <input type="hidden" name="date" value="{{ date }}">
     <input type="hidden" name="start_time" value="{{ start_time }}">
     <input type="hidden" name="guid" value="{{ ticket.guid }}">

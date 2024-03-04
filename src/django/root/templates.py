@@ -47,4 +47,4 @@ def _get_attr(obj, attr):
 def message(request, message : str, url_name : str = "", url_args : list = []):
     if url_name == "":
         url_name = "index"
-    return render(request, "root/message.html", {"message": message, "url": reverse(url_name, args=[])})
+    return render(request, "root/message.html", {"message": message, "url": reverse(url_name, args=url_args)})

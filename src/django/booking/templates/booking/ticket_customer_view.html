@@ -1,0 +1,22 @@
+{% extends "root/base.html" %}
+
+{% block content %}
+
+<center>
+
+<div style="display: block; margin: 0, auto; max-width: 35rem;">
+{% include "booking/profile.html" %}
+</div>
+
+<h4 style="margin: 0.5rem;">Vereinbarter Termin: {{ date_display }}</h4>
+<strong>Uhrzeit: </strong>{{ start_time_display }} Uhr<br>
+<strong>Dauer: </strong> {{ duration_display }} Minuten<br>
+
+<br>
+
+<a href="{% url "customer_change_date" ticket.guid %}" class="secondary" style="width: 12rem;">Termin ändern</a><br>
+<a href="{% url "customer_cancel_ticket" ticket.guid %}" class="secondary" style="width: 12rem;">Termin absagen</a><br>
+
+</center>
+
+{% endblock %}

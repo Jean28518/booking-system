@@ -6,6 +6,7 @@ import uuid
 from .models import Ticket, BookingSettings
 import booking.booking as booking
 import locale
+import pytz
 
 def time_to_quarter(time):
     return time.hour * 4 + time.minute // 15
@@ -18,6 +19,9 @@ def quarter_to_time(quarter):
 def is_quarter_15_or_45(quarter):
     return quarter % 4 == 3 or quarter % 4 == 1
 
+
+def is_quarter_30(quarter):
+    return quarter % 4 == 2
 
 def get_free_slots(events, start_time: datetime.datetime, end_time: datetime.datetime):
     """Returns a list of days, which is containing a list of free quarters for each day."""
@@ -54,6 +58,7 @@ def get_free_slots(events, start_time: datetime.datetime, end_time: datetime.dat
                     day["free_slots"] = []
     return days
 
+
 def get_available_slots_for_ticket(ticket):
     """Returns a list of weeks, which is containing a list of days, which is containing available slots for the ticket."""
     # Get all calendars of the user
@@ -66,7 +71,8 @@ def get_available_slots_for_ticket(ticket):
     first_possible_datetime = datetime.datetime.combine(ticket.first_available_date, datetime.time(0, 0))
     if first_possible_datetime < datetime.datetime.now():
         first_possible_datetime = datetime.datetime.now() + datetime.timedelta(minutes=15)
-    days = get_free_slots(events, first_possible_datetime, datetime.datetime.now() + datetime.timedelta(days=BookingSettings.objects.get(assigned_user=ticket.assigned_user).maximum_future_booking_time))
+    settings = booking.get_booking_settings_for_user(ticket.assigned_user)
+    days = get_free_slots(events, first_possible_datetime, datetime.datetime.now() + datetime.timedelta(days=settings.maximum_future_booking_time))
     print_days_with_free_slots(days)
     duration = ticket.duration
     # Make sure that duration is in a 15 minute interval, e.g. 17 minutes will be extended to 30 minutes
@@ -75,9 +81,9 @@ def get_available_slots_for_ticket(ticket):
     # Get duration in quarters
     duration_in_quarters = duration.seconds // 900
     # Remove all days which are not in the future
-    days = [day for day in days if day["date"] >= datetime.datetime.now().date()]
+    timezone = pytz.timezone("Europe/Berlin") 
+    days = [day for day in days if day["date"] >= datetime.datetime.now(timezone).date()]
     
-    settings = booking.get_booking_settings_for_user(ticket.assigned_user)
     earliest_booking_time = settings.earliest_booking_time
     latest_booking_end = settings.latest_booking_end
     
@@ -115,6 +121,10 @@ def get_available_slots_for_ticket(ticket):
         # If there are more options than 5 we remove all slots which are either at :15, or :45
         if len(day["slots"]) > 5:
             day["slots"] = [slot for slot in day["slots"] if not is_quarter_15_or_45(slot)]
+
+        # If there are more option than 10 we remove all slots which are at :30
+        if len(day["slots"]) > 10:
+            day["slots"] = [slot for slot in day["slots"] if not is_quarter_30(slot)]
                 
         # Lets convert the slots to dicts with start, end 
         new_slots = []
@@ -126,10 +136,14 @@ def get_available_slots_for_ticket(ticket):
         locale.setlocale(locale.LC_ALL, 'de_DE.UTF-8')
         day["title"] = day["date"].strftime("%A, %d.%m.%Y")
         # If day is today, add "Heute" to the title
-        if day["date"] == datetime.datetime.now().date():
+        if day["date"] == datetime.datetime.now(timezone).date():
             day["title"] = "Heute, " + day["title"]
+            # Remove all slots which are in the past (here our timezone is Berlin, so we can use the timezone directly)
+            # We remove the slots here, because above we would have issues by comparing "different" timezones
+            # We can't set everything to the real timezone, because apparently the database is not timezone aware
+            day["slots"] = [slot for slot in day["slots"] if time_to_quarter(slot["start"]) > time_to_quarter((datetime.datetime.now(timezone) + datetime.timedelta(minutes=15)).time())]
         # If day is tomorrow, add "Morgen" to the title
-        if day["date"] == datetime.datetime.now().date() + datetime.timedelta(days=1):
+        if day["date"] == datetime.datetime.now(timezone).date() + datetime.timedelta(days=1):
             day["title"] = "Morgen, " + day["title"]
     
     # Now generate a list of weeks
@@ -229,3 +243,8 @@ def generate_guid():
     return str(uuid.uuid4())
 
 
+def remove_booking(ticket_guid):
+    """Removes the booking from the calendar."""
+    ticket = Ticket.objects.get(guid=ticket_guid)
+    ticket.current_date = None
+    ticket.save()    

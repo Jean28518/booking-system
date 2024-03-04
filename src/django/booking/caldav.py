@@ -279,15 +279,27 @@ def get_events_from_response(response : str):
 
     for event in events_to_remove:
         events.remove(event)
-            
-                    
-
-
-
     return events
 
+events_cache = {}
+
+# If the cached object is older than 1 minute, we return None and remove the object from the cache
+def get_cached_events(caldav_adress, username: str=""):
+    cache_key = caldav_adress + username
+    if cache_key in events_cache:
+        if (datetime.datetime.now() - events_cache[cache_key]["time"]).seconds < 60:
+            return events_cache[cache_key]["events"]
+        else:
+            del events_cache[cache_key]
+    return None
+
+def cache_events(caldav_adress, username: str="", events: list=[]):
+    cache_key = caldav_adress + username
+    events_cache[cache_key] = {"time": datetime.datetime.now(), "events": events}
 
 def get_all_caldav_events(caldav_adress, username: str=None, password: str=None):
+    if get_cached_events(caldav_adress, username):
+        return get_cached_events(caldav_adress, username)
     http = httplib2.Http()
 
     if caldav_adress.endswith(".ics"):
@@ -345,7 +357,9 @@ def get_all_caldav_events(caldav_adress, username: str=None, password: str=None)
         # Write content to file
         with open("calendar.txt", "w") as file:
             file.write(content)
-        return get_events_from_response(content)
+        events = get_events_from_response(content)
+        cache_events(caldav_adress, username, events)
+        return events
     else:
         print(f"Error retrieving events: {response.status}")
         return []
