@@ -151,7 +151,7 @@ def get_available_slots_for_ticket(ticket):
     # If the first day is not a monday, add empty days to the beginning
     weeks = []
     current_week = []
-    empty_day = {"date": None, "slots": []}
+    empty_day = {"date": None, "slots": [], "empty": True}
     for day in days:
         if not day["date"].weekday() == 0 and len(current_week) == 0:
             for i in range(day["date"].weekday()):
@@ -246,5 +246,37 @@ def generate_guid():
 def remove_booking(ticket_guid):
     """Removes the booking from the calendar."""
     ticket = Ticket.objects.get(guid=ticket_guid)
+    calendar = get_main_calendar_for_user(ticket.assigned_user)
+    caldav.delete_caldav_event(ticket.caldav_event_uid, calendar.url, calendar.username, calendar.password)
     ticket.current_date = None
+    ticket.caldav_event_uid = None
     ticket.save()    
+
+
+def book_ticket(ticket_guid):
+    """Books the ticket in the calendar."""
+    ticket = Ticket.objects.get(guid=ticket_guid)
+    calendar = get_main_calendar_for_user(ticket.assigned_user)
+    start = ticket.current_date
+    end = ticket.current_date + ticket.duration
+    caldav_uid = generate_guid()
+    caldav.create_caldav_event(start, end, caldav_uid, ticket.name, calendar.url, calendar.username, calendar.password)
+    ticket.caldav_event_uid = caldav_uid
+    ticket.save()
+
+
+def is_slot_available(ticket_guid, date, start_time):
+    ticket = Ticket.objects.get(guid=ticket_guid)
+    weeks = get_available_slots_for_ticket(ticket)
+    for week in weeks:
+        for day in week:
+            if day["date"] == None:
+                continue
+            if day["date"].strftime("%Y-%m-%d").strip() == date.strftime("%Y-%m-%d").strip():
+                for slot in day["slots"]:
+                    if slot["start"].strftime("%H:%M").strip() == start_time.strftime("%H:%M").strip():
+                        return True
+            return False
+        
+    return False
+    

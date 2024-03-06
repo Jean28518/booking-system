@@ -193,19 +193,17 @@ def booking_settings(request):
 
     
 def select_slot(request, guid, date, start_time):
-    print("HUHUU")
     ticket = Ticket.objects.get(guid=guid)
     start_time = datetime.datetime.strptime(start_time, "%H:%M:%S").time()
     date = datetime.datetime.strptime(date, "%Y-%m-%d").date()
 
     if request.method == "POST":
-        print("POST")
         # Check if the selected slot is still available
-        # if not booking.calendar.is_slot_available(ticket, date, start_time):
-        #     return templates.message(request, "Ein Fehler ist aufgetreten. Bitte wählen Sie einen anderen Slot.", "ticket_customer_view", [guid])
+        if ticket.current_date == None and not booking.calendar.is_slot_available(guid, date, start_time):
+            return templates.message(request, "Ein Fehler ist aufgetreten. Bitte wählen Sie einen anderen Slot.", "ticket_customer_view", [guid])
         ticket.current_date = datetime.datetime.combine(date, start_time)
         ticket.save()
-        # booking.calendar.book_slot(ticket, date, start_time)
+        booking.calendar.book_ticket(guid)
         return redirect("ticket_customer_view", guid=guid)
 
     start_time_display = start_time.strftime("%H:%M")

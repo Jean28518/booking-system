@@ -363,3 +363,60 @@ def get_all_caldav_events(caldav_adress, username: str=None, password: str=None)
     else:
         print(f"Error retrieving events: {response.status}")
         return []
+
+
+def create_caldav_event(start: datetime.datetime, end: datetime.datetime, uid: str,  summary: str, caldav_address: str, username: str=None, password: str=None):
+    http = httplib2.Http()
+    headers = {
+        "Content-Type": "text/calendar",
+    }
+    if not caldav_address.endswith(".ics"):
+        if not caldav_address.endswith("/"):
+            caldav_address += "/"
+        caldav_address += f"{uid}.ics"
+
+    if username and password:
+        # Add Basic Authentication header
+        headers["Authorization"] = "Basic " + base64.b64encode(f"{username}:{password}".encode("utf-8")).decode("utf-8")
+    event = f"""BEGIN:VCALENDAR
+BEGIN:VEVENT
+UID:{uid}
+SUMMARY:{summary}
+DTSTART:{start.strftime("%Y%m%dT%H%M%S")}
+DTEND:{end.strftime("%Y%m%dT%H%M%S")}
+END:VEVENT
+END:VCALENDAR
+"""
+
+    response, content = http.request(
+        caldav_address, "PUT", body=event, headers=headers
+    )
+    if response.status == 201:
+        return True
+    else:
+        print(f"Error creating event: {response.status}")
+        print(content)
+        return False
+    
+def delete_caldav_event(uid: str, caldav_address: str, username: str=None, password: str=None):
+    http = httplib2.Http()
+    headers = {
+        "Content-Type": "text/calendar",
+    }
+    if not caldav_address.endswith(".ics"):
+        if not caldav_address.endswith("/"):
+            caldav_address += "/"
+        caldav_address += f"{uid}.ics"
+
+    if username and password:
+        # Add Basic Authentication header
+        headers["Authorization"] = "Basic " + base64.b64encode(f"{username}:{password}".encode("utf-8")).decode("utf-8")
+    response, content = http.request(
+        caldav_address, "DELETE", headers=headers
+    )
+    if response.status == 204:
+        return True
+    else:
+        print(f"Error deleting event: {response.status}")
+        print(content)
+        return False
