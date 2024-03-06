@@ -4,5 +4,10 @@ http:// {
         file_server
       	encode zstd gzip
     }
+    handle_path /media* {
+        root * /app/media/
+        file_server
+      	encode zstd gzip
+    }
     reverse_proxy django_gunicorn:8000
 }

@@ -19,6 +19,7 @@ services:
       - ./caddy_data:/data
       - ./caddy_config:/config
       - static:/static
+      - ./src/django:/app
     image: caddy:latest
 
   
