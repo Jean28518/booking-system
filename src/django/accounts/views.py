@@ -4,8 +4,13 @@ from django.contrib.auth import authenticate, login, logout
 from django.urls import reverse
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
+
 from accounts.models import Profile
 import os
+
+import cfg.cfg as cfg
+import root.templates as templates
 
 
 # Create your views here.
@@ -40,6 +45,8 @@ def register_view(request):
     user = request.user
     if user.is_authenticated:
         return redirect("index")
+    if cfg.get_value("enable_registration", False) == False and User.objects.count() > 0:
+        return templates.message(request, "Registrierung deaktiviert. Bitte kontaktieren Sie den Administrator.", "index")
     message = ""
     if request.method == "POST":
         register_form = forms.RegisterForm(request.POST)
@@ -56,6 +63,9 @@ def register_view(request):
                     profile = Profile(user=user)
                     profile.save()
                     user.profile = profile
+                    if User.objects.count() == 0:
+                        user.is_staff = True
+                        user.is_superuser = True
                     user.save()
                 return redirect("login")
             else:
@@ -145,3 +155,18 @@ def handle_uploaded_file(f, username, allowed_extensions=["png", "jpg", "jpeg", 
             destination.write(chunk)
 
     return f"profile_pictures/{username}.{file_extension}"
+
+
+@staff_member_required()
+def admin_settings(request):
+    message = ""
+    form = forms.AdminSettingsForm()
+    if request.method == "POST":
+        form = forms.AdminSettingsForm(request.POST)
+        if form.is_valid():
+            cfg.set_value("enable_registration", form.cleaned_data["enable_registration"])
+            message = "Änderungen abgespeichert."
+        else:
+            message = "Fehler beim Bearbeiten der Einstellungen."
+    form.fields["enable_registration"].initial = cfg.get_value("enable_registration", False)
+    return render(request, 'root/generic_form.html', {"title": "Administrator-Einstellungen", "form": form, "back": reverse("index"), "submit": "Speichern", "message": message})

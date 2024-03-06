@@ -12,6 +12,7 @@ import booking.calendar
 import booking.caldav
 import booking.booking
 
+from django.contrib.auth.models import User
 
 
 @login_required()

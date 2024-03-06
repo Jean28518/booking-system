@@ -21,3 +21,7 @@ class ProfileForm(forms.Form):
     email = forms.EmailField(max_length=200, label="E-Mail", required=False)
     phone = forms.CharField(max_length=200, label="Telefonnummer", required=False)
     picture = forms.ImageField(label="Profilbild", required=False)
+
+
+class AdminSettingsForm(forms.Form):
+    enable_registration = forms.BooleanField(label="Erlaube Registrierung", required=False)

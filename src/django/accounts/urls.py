@@ -10,5 +10,5 @@ urlpatterns = [
 
     path("profile", views.profile_view, name="profile"),
 
-
+    path("admin_settings", views.admin_settings, name="admin_settings"),
 ]
