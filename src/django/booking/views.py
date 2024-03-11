@@ -117,6 +117,15 @@ def ticket_customer_view(request, guid):
         duration_display = ticket.duration.seconds // 60
         return render(request, "booking/ticket_customer_view.html", {"ticket": ticket, "date_display": date_display, "start_time_display": start_time_display, "duration_display": duration_display})
     weeks = booking.calendar.get_available_slots_for_ticket(ticket)
+    slots = []
+    for week in weeks:
+        for day in week:
+            date = day["date"]
+            for slot in day.get("slots", []):
+                slots.append((date.strftime("%d.%m.%Y"), slot["start"].strftime("%H:%M:%S")))
+    request.session["slots"] = slots
+    request.session["ticket_guid"] = guid
+    request.session["now"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     return render(request, "booking/select_slot.html", {"weeks": weeks, "ticket": ticket})
 
 
@@ -199,9 +208,26 @@ def select_slot(request, guid, date, start_time):
     date = datetime.datetime.strptime(date, "%Y-%m-%d").date()
 
     if request.method == "POST":
-        # Check if the selected slot is still available
-        if ticket.current_date == None and not booking.calendar.is_slot_available(guid, date, start_time):
+        # Check if the selected slot is still available (disabled because of some errors, we get)
+        # if ticket.current_date == None and not booking.calendar.is_slot_available(guid, date, start_time):
+        #     return templates.message(request, "Ein Fehler ist aufgetreten. Bitte wählen Sie einen anderen Slot.", "ticket_customer_view", [guid])
+
+        # Check if the guid in session is the same as the guid in the url
+        if request.session["ticket_guid"] != guid:
             return templates.message(request, "Ein Fehler ist aufgetreten. Bitte wählen Sie einen anderen Slot.", "ticket_customer_view", [guid])
+        # and session[now] is younger than 5 minutes
+        session_now = datetime.datetime.strptime(request.session["now"], "%Y-%m-%d %H:%M:%S")
+        if (datetime.datetime.now() - session_now).seconds > 300:
+            return templates.message(request, "Ihre Sitzung ist abfelaufen. Bitte wählen Sie erneut einen Slot.", "ticket_customer_view", [guid])
+        # Also check if the date and start_time can be found in the presendet slots
+        slot_found = False
+        for slot in request.session.get("slots", []):
+            if slot[0] == date.strftime("%d.%m.%Y") and slot[1] == start_time.strftime("%H:%M:%S"):
+                slot_found = True
+                break
+        if not slot_found:
+            return templates.message(request, "Ein Fehler ist aufgetreten. Bitte wählen Sie einen anderen Slot!", "ticket_customer_view", [guid])
+
         ticket.current_date = datetime.datetime.combine(date, start_time)
         ticket.save()
         booking.calendar.book_ticket(guid)

@@ -265,18 +265,20 @@ def book_ticket(ticket_guid):
     ticket.save()
 
 
-def is_slot_available(ticket_guid, date, start_time):
-    ticket = Ticket.objects.get(guid=ticket_guid)
-    weeks = get_available_slots_for_ticket(ticket)
-    for week in weeks:
-        for day in week:
-            if day["date"] == None:
-                continue
-            if day["date"].strftime("%Y-%m-%d").strip() == date.strftime("%Y-%m-%d").strip():
-                for slot in day["slots"]:
-                    if slot["start"].strftime("%H:%M").strip() == start_time.strftime("%H:%M").strip():
-                        return True
-            return False
+# DEPRECATED
+# Also doesn't work reliable in practice
+# def is_slot_available(ticket_guid, date, start_time):
+#     ticket = Ticket.objects.get(guid=ticket_guid)
+#     weeks = get_available_slots_for_ticket(ticket)
+#     for week in weeks:
+#         for day in week:
+#             if day["date"] == None:
+#                 continue
+#             if day["date"].strftime("%Y-%m-%d").strip() == date.strftime("%Y-%m-%d").strip():
+#                 for slot in day["slots"]:
+#                     if slot["start"].strftime("%H:%M").strip() == start_time.strftime("%H:%M").strip():
+#                         return True
+#             return False
         
-    return False
+#     return False
     
