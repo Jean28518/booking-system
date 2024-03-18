@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
+from django.core.mail import send_mail, EmailMessage
 import root.templates as templates
 import datetime
 import pytz
@@ -209,6 +210,7 @@ def select_slot(request, guid, date, start_time):
     ticket = Ticket.objects.get(guid=guid)
     start_time = datetime.datetime.strptime(start_time, "%H:%M:%S").time()
     date = datetime.datetime.strptime(date, "%Y-%m-%d").date()
+    duration_display = ticket.duration.seconds // 60
 
     if request.method == "POST":
         # Check if the selected slot is still available (disabled because of some errors, we get)
@@ -221,7 +223,7 @@ def select_slot(request, guid, date, start_time):
         # and session[now] is younger than 5 minutes
         session_now = datetime.datetime.strptime(request.session["now"], "%Y-%m-%d %H:%M:%S")
         if (datetime.datetime.now() - session_now).seconds > 300:
-            return templates.message(request, "Ihre Sitzung ist abfelaufen. Bitte wählen Sie erneut einen Slot.", "ticket_customer_view", [guid])
+            return templates.message(request, "Ihre Sitzung ist abgelaufen. Bitte wählen Sie erneut einen Slot.", "ticket_customer_view", [guid])
         # Also check if the date and start_time can be found in the presendet slots
         slot_found = False
         for slot in request.session.get("slots", []):
@@ -232,21 +234,72 @@ def select_slot(request, guid, date, start_time):
             return templates.message(request, "Ein Fehler ist aufgetreten. Bitte wählen Sie einen anderen Slot!", "ticket_customer_view", [guid])
 
         ticket.current_date = datetime.datetime.combine(date, start_time)
+        ticket.email_of_customer = request.POST.get("email", "")
         ticket.save()
         booking.calendar.book_ticket(guid)
+        assigned_user = ticket.assigned_user
+        current_date = ticket.current_date
+        send_mail(
+            'Termin "' + ticket.name + '" gebucht. Datum: ' + current_date.strftime("%d.%m.%Y %H:%M") + ' Uhr.',
+            f'Der Termin wurde am {ticket.current_date.strftime("%d.%m.%Y um %H:%M")} Uhr gebucht.',
+            settings.EMAIL_HOST_USER,
+            [assigned_user.email],
+            fail_silently=True,
+        )
+        ticket_description = booking.booking.get_ticket_description_for_customer(ticket)
+        attachment_ics = booking.calendar.get_ical_string_for_ticket(ticket.guid)
+        if ticket.email_of_customer:
+            email = EmailMessage(
+                f'{ticket_description} gebucht. Datum: ' + current_date.strftime("%d.%m.%Y %H:%M") + ' Uhr.',
+                f'{ticket_description} wurde am {ticket.current_date.strftime("%d.%m.%Y um %H:%M")} Uhr mit einer Dauer von {duration_display} Minuten gebucht.\n\nTipp: Sie können den Termin jeder Zeit über folgenden Link verwalten: {settings.BASE_URL + reverse("ticket_customer_view", args=[guid])}',
+                settings.EMAIL_HOST_USER,
+                [ticket.email_of_customer],
+            )
+            email.attach("termin.ics", attachment_ics, "text/calendar")
+            email.send()
         return redirect("ticket_customer_view", guid=guid)
 
     start_time_display = start_time.strftime("%H:%M")
     date_display = date.strftime("%d.%m.%Y")
-    duration_display = ticket.duration.seconds // 60
-    return render(request, "booking/booking_confirmation.html", {"ticket": ticket, "date": date, "start_time": start_time, "start_time_display": start_time_display, "date_display": date_display, "duration_display": duration_display})
+    email_of_customer = ticket.email_of_customer
+    return render(request, "booking/booking_confirmation.html", {"ticket": ticket, "date": date, "start_time": start_time, "start_time_display": start_time_display, "date_display": date_display, "duration_display": duration_display, "email_of_customer": email_of_customer})
 
 
 def customer_cancel_ticket(request, guid):
+    ticket = Ticket.objects.get(guid=guid)
+    current_date = ticket.current_date
     booking.calendar.remove_booking(guid)
+    assigned_user = ticket.assigned_user
+    send_mail(
+        'Termin "' + ticket.name + '" storniert.',
+        f'Der Termin am {current_date.strftime("%d.%m.%Y um %H:%M")} Uhr wurde storniert.',
+        settings.EMAIL_HOST_USER,
+        [assigned_user.email],
+        fail_silently=True,
+    )
+    ticket_description = booking.booking.get_ticket_description_for_customer(ticket)
+    if ticket.email_of_customer:
+        send_mail(
+            f'{ticket_description} storniert. Datum: {current_date.strftime("%d.%m.%Y um %H:%M")} Uhr.',
+            f'{ticket_description} am {current_date.strftime("%d.%m.%Y um %H:%M")} Uhr wurde storniert.\n\nTipp: Sie können den Termin jeder Zeit über folgenden Link neu buchen: {settings.BASE_URL + reverse("ticket_customer_view", args=[guid])}',
+            settings.EMAIL_HOST_USER,
+            [ticket.email_of_customer],
+            fail_silently=True,
+        )
     return templates.message(request, "Termin erfolgreich storniert. Wenn Sie den Termin doch wahrnehmen wollen, werden Sie nun wieder zur Buchungs-Seite weitergeleitet.", "ticket_customer_view", [guid])
 
 
 def customer_change_date(request, guid):
+    """We remove the booking of the ticket and redirect to the booking page. The user can then select a new date."""
+    ticket = Ticket.objects.get(guid=guid)
+    last_date = ticket.current_date
     booking.calendar.remove_booking(guid)
+    assigned_user = ticket.assigned_user
+    send_mail(
+        'Termin "' + ticket.name + '" wird verschoben...',
+        f'Der Termin wurde vom {last_date.strftime("%d.%m.%Y um %H:%M")} Uhr wurde abgesagt.\nDer Nutzer wird nun aufgefordert, einen neuen Termin zu buchen.',
+        settings.EMAIL_HOST_USER,
+        [assigned_user.email],
+        fail_silently=True,
+    )
     return redirect("ticket_customer_view", guid=guid)

@@ -415,3 +415,16 @@ def delete_caldav_event(uid: str, caldav_address: str, username: str=None, passw
         print(f"Error deleting event: {response.status}")
         print(content)
         return False
+    
+
+# Make sure that the the user can't click on "accept" or "decline" in the mail client
+def get_ical_string_for_event(start: datetime.datetime, end: datetime.datetime, summary: str, location: str = ""):
+    return f"""BEGIN:VCALENDAR
+BEGIN:VEVENT
+SUMMARY:{summary}
+LOCATION:{location}
+DTSTART:{start.strftime("%Y%m%dT%H%M%S")}
+DTEND:{end.strftime("%Y%m%dT%H%M%S")}
+END:VEVENT
+END:VCALENDAR
+"""

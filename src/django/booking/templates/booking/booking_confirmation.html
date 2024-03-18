@@ -10,6 +10,9 @@
 <strong>Dauer:</strong> {{ duration_display }} Minuten<br>
 
 <form style="padding: 2rem;" method="post">
+    <label style="width: 25rem;">Termin-Bestätigung für den eigenen Kalender:
+        <input type="email" name="email" placeholder="E-Mail (optional)" value={{email_of_customer}}><br>
+    </label>
     <input type="hidden" name="date" value="{{ date }}">
     <input type="hidden" name="start_time" value="{{ start_time }}">
     <input type="hidden" name="guid" value="{{ ticket.guid }}">
