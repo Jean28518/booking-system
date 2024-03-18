@@ -5,6 +5,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 
 import mails.forms as forms
 import cfg.cfg as cfg
+from . import apply_settings
 
 @staff_member_required
 def email_settings(request):
@@ -16,6 +17,7 @@ def email_settings(request):
                 if field == "password" and form.cleaned_data[field] == "":
                     continue
                 cfg.set_value(f"email_{field}", form.cleaned_data[field])
+            apply_settings()
     
     for field in form.fields:
         form.fields[field].initial = cfg.get_value(f"email_{field}", "")
