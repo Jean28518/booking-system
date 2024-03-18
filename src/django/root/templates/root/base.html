@@ -116,6 +116,7 @@
                         <li><a href="{% url "profile" %}">Profil</a></li>
                         <li><a href="{% url "change_password" %}">Passwort ändern</a></li>
                         {% if request.user.is_superuser %}
+                            <li><a href="{% url "email_settings" %}">E-Mail-Einstellungen</a></li>
                             <li><a href="{% url "admin_settings" %}">Administrator-Einstellungen</a></li>
                         {% endif %}
                         <li><a href="{% url "logout" %}">Ausloggen</a></li>
