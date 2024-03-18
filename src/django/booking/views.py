@@ -37,6 +37,7 @@ def index(request):
         share_url = settings.BASE_URL + reverse("ticket_customer_view", args=[ticket.guid])
         return render(request, "booking/ticket_created.html", {"ticket": ticket, "share_url": share_url})
 
+    booking.booking.delete_old_tickets()
     default_name = "Ticket von " + datetime.datetime.now().strftime("%d.%m.%Y %H:%M Uhr")
     start_date = datetime.date.today().strftime("%Y-%m-%d")
     expiry_date = (datetime.date.today() + datetime.timedelta(days=14)).strftime("%Y-%m-%d")
