@@ -63,7 +63,7 @@ def register_view(request):
                     profile = Profile(user=user)
                     profile.save()
                     user.profile = profile
-                    if User.objects.count() == 0:
+                    if User.objects.count() == 1:
                         user.is_staff = True
                         user.is_superuser = True
                     user.save()
