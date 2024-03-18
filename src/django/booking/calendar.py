@@ -261,7 +261,8 @@ def book_ticket(ticket_guid):
     start = ticket.current_date
     end = ticket.current_date + ticket.duration
     caldav_uid = generate_guid()
-    caldav.create_caldav_event(start, end, caldav_uid, ticket.name, calendar.url, calendar.username, calendar.password)
+    jitsi_link = booking.get_jitsi_link_for_ticket(ticket)
+    caldav.create_caldav_event(start, end, caldav_uid, ticket.name, calendar.url, calendar.username, calendar.password, jitsi_link)
     ticket.caldav_event_uid = caldav_uid
     ticket.save()
 
@@ -272,7 +273,8 @@ def get_ical_string_for_ticket(ticket_guid):
     start = ticket.current_date
     end = ticket.current_date + ticket.duration
     summary = booking.get_ticket_description_for_customer(ticket)
-    return caldav.get_ical_string_for_event(start, end, summary)
+    jitsi_link = booking.get_jitsi_link_for_ticket(ticket)
+    return caldav.get_ical_string_for_event(start, end, summary, jitsi_link)
 
 
 # DEPRECATED

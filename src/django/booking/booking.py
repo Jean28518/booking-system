@@ -25,3 +25,21 @@ def delete_old_tickets():
     for ticket in tickets:
         tickets_to_delete.append(ticket)
     Ticket.objects.filter(id__in=[ticket.id for ticket in tickets_to_delete]).delete()
+
+
+def get_jitsi_link_for_ticket(ticket: Ticket):
+    if not ticket.generate_jitsi_link:
+        return ""
+    
+    assigned_user = ticket.assigned_user
+    booking_settings = get_booking_settings_for_user(assigned_user)
+    jitsi_server = booking_settings.jitsi_server
+
+    if jitsi_server and ticket.generate_jitsi_link:
+        if jitsi_server[-1] == "/":
+            jitsi_server = jitsi_server[:-1]
+        return jitsi_server + "/" + ticket.guid
+    elif ticket.generate_jitsi_link:
+        return "https://meet.jit.si/" + ticket.guid
+    else:
+        return ""

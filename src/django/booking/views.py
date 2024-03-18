@@ -117,7 +117,8 @@ def ticket_customer_view(request, guid):
         date_display = ticket.current_date.strftime("%d.%m.%Y")
         start_time_display = ticket.current_date.strftime("%H:%M")
         duration_display = ticket.duration.seconds // 60
-        return render(request, "booking/ticket_customer_view.html", {"ticket": ticket, "date_display": date_display, "start_time_display": start_time_display, "duration_display": duration_display})
+        jitsi_link = booking.booking.get_jitsi_link_for_ticket(ticket)
+        return render(request, "booking/ticket_customer_view.html", {"ticket": ticket, "date_display": date_display, "start_time_display": start_time_display, "duration_display": duration_display, "jitsi_link": jitsi_link})
     weeks = booking.calendar.get_available_slots_for_ticket(ticket)
     slots = []
     for week in weeks:
@@ -240,9 +241,12 @@ def select_slot(request, guid, date, start_time):
         booking.calendar.book_ticket(guid)
         assigned_user = ticket.assigned_user
         current_date = ticket.current_date
+        meeting_link_description = ""
+        if ticket.generate_jitsi_link:
+            meeting_link_description = f"\nLink zum Meeting (Jitsi): {booking.booking.get_jitsi_link_for_ticket(ticket)}"
         send_mail(
             'Termin "' + ticket.name + '" gebucht. Datum: ' + current_date.strftime("%d.%m.%Y %H:%M") + ' Uhr.',
-            f'Der Termin wurde am {ticket.current_date.strftime("%d.%m.%Y um %H:%M")} Uhr gebucht.',
+            f'Der Termin wurde am {ticket.current_date.strftime("%d.%m.%Y um %H:%M")} Uhr gebucht.' + meeting_link_description,
             settings.EMAIL_HOST_USER,
             [assigned_user.email],
             fail_silently=True,
@@ -252,7 +256,7 @@ def select_slot(request, guid, date, start_time):
         if ticket.email_of_customer:
             email = EmailMessage(
                 f'{ticket_description} gebucht. Datum: ' + current_date.strftime("%d.%m.%Y %H:%M") + ' Uhr.',
-                f'{ticket_description} wurde am {ticket.current_date.strftime("%d.%m.%Y um %H:%M")} Uhr mit einer Dauer von {duration_display} Minuten gebucht.\n\nTipp: Sie können den Termin jeder Zeit über folgenden Link verwalten: {settings.BASE_URL + reverse("ticket_customer_view", args=[guid])}',
+                f'{ticket_description} wurde am {ticket.current_date.strftime("%d.%m.%Y um %H:%M")} Uhr mit einer Dauer von {duration_display} Minuten gebucht.{meeting_link_description}\n\nTipp: Sie können den Termin jeder Zeit über folgenden Link verwalten: {settings.BASE_URL + reverse("ticket_customer_view", args=[guid])}',
                 settings.EMAIL_HOST_USER,
                 [ticket.email_of_customer],
             )
@@ -262,7 +266,9 @@ def select_slot(request, guid, date, start_time):
 
     start_time_display = start_time.strftime("%H:%M")
     date_display = date.strftime("%d.%m.%Y")
-    email_of_customer = ticket.email_of_customer
+    email_of_customer = ""
+    if ticket.email_of_customer:
+        email_of_customer = ticket.email_of_customer
     return render(request, "booking/booking_confirmation.html", {"ticket": ticket, "date": date, "start_time": start_time, "start_time_display": start_time_display, "date_display": date_display, "duration_display": duration_display, "email_of_customer": email_of_customer})
 
 

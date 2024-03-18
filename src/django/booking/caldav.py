@@ -360,7 +360,7 @@ def get_all_caldav_events(caldav_adress, username: str=None, password: str=None)
         return []
 
 
-def create_caldav_event(start: datetime.datetime, end: datetime.datetime, uid: str,  summary: str, caldav_address: str, username: str=None, password: str=None):
+def create_caldav_event(start: datetime.datetime, end: datetime.datetime, uid: str,  summary: str, caldav_address: str, username: str=None, password: str=None, location: str = ""):
     http = httplib2.Http()
     headers = {
         "Content-Type": "text/calendar",
@@ -379,6 +379,7 @@ UID:{uid}
 SUMMARY:{summary}
 DTSTART:{start.strftime("%Y%m%dT%H%M%S")}
 DTEND:{end.strftime("%Y%m%dT%H%M%S")}
+LOCATION:{location}
 END:VEVENT
 END:VCALENDAR
 """

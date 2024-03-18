@@ -11,6 +11,7 @@
 <h4 style="margin: 0.5rem;">Vereinbarter Termin: {{ date_display }}</h4>
 <strong>Uhrzeit: </strong>{{ start_time_display }} Uhr<br>
 <strong>Dauer: </strong> {{ duration_display }} Minuten<br>
+{% if jitsi_link != "" %}<strong>Link zum Meeting (Jitsi): </strong><br><a href="{{ jitsi_link }}">{{ jitsi_link }}</a><br>{% endif %}
 
 <br>
 
