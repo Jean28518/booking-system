@@ -1,6 +1,10 @@
 #!/bin/sh
 
-apk add gettext
+apt-get update
+apt-get install -y gettext locales
+
+echo "de_DE.UTF-8 UTF-8" >> /etc/locale.gen
+locale-gen
 
 pip install --upgrade pip
 

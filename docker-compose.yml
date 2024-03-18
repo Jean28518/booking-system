@@ -7,7 +7,7 @@ services:
       - ./src/django:/app
       - ./docker-entrypoint.sh:/docker-entrypoint.sh
       - static:/static
-    image: python:3.12-alpine
+    image: python:3.12-bullseye
     entrypoint: sh /docker-entrypoint.sh
 
   caddy:
