@@ -23,6 +23,8 @@ class CalendarForm(forms.ModelForm):
 
 
 class TicketForm(forms.ModelForm):
+    ticket_customer_link = forms.CharField(label='Link für Kunden', widget=forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly'}))
+
     class Meta:
         model = Ticket
         fields = ['name', 'first_available_date', 'duration', 'expiry', 'generate_jitsi_link']
@@ -35,9 +37,9 @@ class TicketForm(forms.ModelForm):
         }
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
-            'first_available_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'aria-label': "Date"}),
+            'first_available_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'aria-label': "Date"}, format='%Y-%m-%d'),
             'duration': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time', 'aria-label': "Time"}),
-            'expiry': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'aria-label': "Date"}),
+            'expiry': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'aria-label': "Date"}, format='%Y-%m-%d'),
             'generate_jitsi_link': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 

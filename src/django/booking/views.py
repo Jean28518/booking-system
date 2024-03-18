@@ -181,6 +181,9 @@ def edit_ticket(request, guid):
             return render(request, "root/message.html", {"message": "Änderungen abgespeichert", "url": reverse("tickets")})
         else:
             message = "Fehler beim Bearbeiten des Tickets"
+    form.fields['ticket_customer_link'].initial = settings.BASE_URL + reverse("ticket_customer_view", args=[guid])
+    form.fields['first_available_date'].initial = ticket.first_available_date.strftime("%Y-%m-%d")
+    form.fields['expiry'].initial = ticket.expiry.strftime("%Y-%m-%d")
     return render(request, 'root/edit_x.html', {"name": ticket.name, "form": form, "back": reverse("tickets"), "message": message})
 
 

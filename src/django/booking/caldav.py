@@ -4,11 +4,6 @@ import datetime
 from dateutil.relativedelta import relativedelta
 from urllib.parse import unquote
 
-
-def get_all_calendars_of_primary_adress():
-    primary_calendar_adress = "https://cloud.jf-vogelbacher.de/remote.php/dav"
-
-
 def day_to_number(day: str):
     if day == "MO":
         return 0
