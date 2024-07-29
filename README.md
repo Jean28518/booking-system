@@ -15,7 +15,7 @@ booking.int.de {
 vim src/django/root/settings.py
 DEBUG = False
 ALLOWED_HOSTS = ["*"]
-
+BASE_URL = "https://booking.int.de/
 ```
 
 ## How to develop
