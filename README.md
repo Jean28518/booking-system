@@ -5,17 +5,18 @@
 ```bash
 git clone https://github.com/Jean28518/booking-system.git
 cd booking-system
+vim src/django/root/settings.py
+DEBUG = False
+ALLOWED_HOSTS = ["*"]
+BASE_URL = "https://booking.int.de/
+
+
 docker-compose up -d
 
 vim /etc/caddy/Caddyfile
 booking.int.de {
   reverse_proxy localhost:10324
 }
-
-vim src/django/root/settings.py
-DEBUG = False
-ALLOWED_HOSTS = ["*"]
-BASE_URL = "https://booking.int.de/
 ```
 
 ## How to develop
