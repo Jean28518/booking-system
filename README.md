@@ -6,6 +6,16 @@
 git clone https://github.com/Jean28518/booking-system.git
 cd booking-system
 docker-compose up -d
+
+vim /etc/caddy/Caddyfile
+booking.int.de {
+  reverse_proxy localhost:10324
+}
+
+vim src/django/root/settings.py
+DEBUG = False
+ALLOWED_HOSTS = ["*"]
+
 ```
 
 ## How to develop
