@@ -8,7 +8,7 @@ cd booking-system
 vim src/django/root/settings.py
 DEBUG = False
 ALLOWED_HOSTS = ["*"]
-BASE_URL = "https://booking.int.de/
+BASE_URL = "https://booking.int.de/"
 
 
 docker-compose up -d
