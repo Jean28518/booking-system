@@ -8,6 +8,7 @@ source .env/bin/activate
 
 pip install -r requirements.txt
 
+python3 manage.py makemigrations --no-input
 python3 manage.py migrate --no-input
 
 echo "Starting server..."

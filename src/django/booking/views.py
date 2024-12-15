@@ -3,9 +3,11 @@ from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.core.mail import send_mail, EmailMessage
+from django.http import HttpResponse
 import root.templates as templates
 import datetime
-import pytz
+from booking.timezones import common_timezones_array_of_dicts
+
 
 from .models import Calendar, Ticket
 import booking.forms as forms
@@ -18,6 +20,7 @@ from django.contrib.auth.models import User
 
 @login_required()
 def index(request):
+    _load_timezone_for_request(request)
     if request.method == "POST":
         name = request.POST.get("name", "")
         # Parse date
@@ -112,13 +115,14 @@ def delete_calendar(request, calendar_id):
 
 
 def ticket_customer_view(request, guid):
+    _load_timezone_for_request(request)
     ticket = Ticket.objects.get(guid=guid)
     if ticket.current_date:
         date_display = ticket.current_date.strftime("%d.%m.%Y")
         start_time_display = ticket.current_date.strftime("%H:%M")
         duration_display = ticket.duration.seconds // 60
         jitsi_link = booking.booking.get_jitsi_link_for_ticket(ticket)
-        return render(request, "booking/ticket_customer_view.html", {"ticket": ticket, "date_display": date_display, "start_time_display": start_time_display, "duration_display": duration_display, "jitsi_link": jitsi_link})
+        return render(request, "booking/ticket_customer_view.html", {"ticket": ticket, "date_display": date_display, "start_time_display": start_time_display, "duration_display": duration_display, "jitsi_link": jitsi_link, "timezones": common_timezones_array_of_dicts})
     weeks = booking.calendar.get_available_slots_for_ticket(ticket)
     slots = []
     for week in weeks:
@@ -129,7 +133,7 @@ def ticket_customer_view(request, guid):
     request.session["slots"] = slots
     request.session["ticket_guid"] = guid
     request.session["now"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    return render(request, "booking/select_slot.html", {"weeks": weeks, "ticket": ticket})
+    return render(request, "booking/select_slot.html", {"weeks": weeks, "ticket": ticket, "timezones": common_timezones_array_of_dicts})
 
 
 @login_required()
@@ -205,7 +209,7 @@ def booking_settings(request):
         else:
             message = "Fehler beim Bearbeiten der Einstellungen."
 
-    return render(request, 'root/generic_form.html', {"title": "Buchungseinstellungen", "form": form, "back": reverse("index"), "message": message, "submit": "Speichern", "display_buttons_at_top": True})
+    return render(request, 'root/generic_form.html', {"title": "Buchungseinstellungen", "form": form, "back": reverse("index"), "message": message, "submit": "Speichern", "display_buttons_at_top": True, "timezones": common_timezones_array_of_dicts})
 
     
 def select_slot(request, guid, date, start_time):
@@ -310,3 +314,28 @@ def customer_change_date(request, guid):
         fail_silently=True,
     )
     return redirect("ticket_customer_view", guid=guid)
+
+
+def set_timezone(request):
+    if request.method == "POST":
+        request.session["django_timezone"] = request.POST["timezone"]
+
+        if request.user.is_authenticated:
+            user = User.objects.get(id=request.user.id)
+            user.profile.timezone = request.POST["timezone"]
+            user.profile.save()
+        print("Settimezone", request.POST["timezone"])
+        # Save also the timezone in a cookie
+        response = HttpResponse("Ok")
+        response.set_cookie("timezone", request.POST["timezone"], max_age=10*365*24*60*60)
+        return response
+    else:
+        return templates.message(request, "Fehler: Bitte wählen Sie eine Zeitzone aus.")
+    
+def _load_timezone_for_request(request):
+    if request.user.is_authenticated:
+        user = User.objects.get(id=request.user.id)
+        request.session["django_timezone"] = user.profile.timezone
+    else:
+        # Load timezone from cookie if available
+        request.session["django_timezone"] = request.COOKIES.get("timezone", "Europe/Berlin")

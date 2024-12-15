@@ -1,5 +1,7 @@
 {% load static %}
 {% load i18n %}
+{% load tz %}
+{% get_current_timezone as TIME_ZONE %}
 <!DOCTYPE html>
 <html>
     <head>
@@ -98,6 +100,16 @@
             {% comment %} <li><a href="#">About</a></li>
             <li><a href="#">Services</a></li>
             <li><a href="#">Products</a></li> {% endcomment %}
+            <!-- Timezone selection -->
+            {% if timezones %}
+            Zeitzone:
+            <select name = "timezone" id="timezone" onchange="setTimezone(this)" style="margin-left: 0.5rem; margin-right: 0.5rem; margin-top: 0.9rem;">
+                {% for timezone in timezones %}
+                    <option value="{{ timezone.tz }}"{% if timezone.tz == TIME_ZONE %} selected{% endif %}>{{ timezone.city }}</option>
+                {% endfor %}
+            </select>
+            {% endif %}
+
             {% if request.user.is_authenticated %}
             <ul>
                 <li><a href="{% url "tickets" %}" class="secondary">Tickets</a></li>
@@ -123,8 +135,8 @@
                     </ul>
                     </details>
                 </li>
-                </ul>
-        {% endif %}
+            </ul>
+            {% endif %}
         </ul>
     </nav>
 </div>
@@ -145,4 +157,38 @@
 </div>
 
 </body>
+
+<script>
+    function setTimezone(select) {
+        // Send a POST request to the server to set the timezone
+        var timezone = select.value;
+        var csrftoken = "{{ csrf_token }}";
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '{% url "set_timezone" %}', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.setRequestHeader('X-CSRFToken', csrftoken);
+        xhr.send('timezone=' + timezone);
+
+        // Sleep for 1 second
+        var start = new Date().getTime();
+        for (var i = 0; i < 1e7; i++) {
+            if ((new Date().getTime() - start) > 1000) {
+                break;
+            }
+        }
+
+        // Reload the page
+        location.reload();
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var timezone = document.getElementById('timezone');
+        if (timezone) {
+            timezone.addEventListener('change', function() {
+                setTimezone(this);
+            });
+        }
+    });
+</script>
+
 </html>

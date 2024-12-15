@@ -20,6 +20,7 @@ urlpatterns = [
 
 
     path("settings/", views.booking_settings, name="booking_settings"),
+    path("set_timezone/", views.set_timezone, name="set_timezone"),
 
     path("select_slot/<str:guid>/<str:date>/<str:start_time>/", views.select_slot, name="select_slot"),
 
