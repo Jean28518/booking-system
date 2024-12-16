@@ -393,8 +393,8 @@ def create_caldav_event(start: datetime.datetime, end: datetime.datetime, uid: s
 BEGIN:VEVENT
 UID:{uid}
 SUMMARY:{summary}
-DTSTART:{start.strftime("%Y%m%dT%H%M%S")}
-DTEND:{end.strftime("%Y%m%dT%H%M%S")}
+DTSTART;TZID=UTC:{start.strftime("%Y%m%dT%H%M%S")}
+DTEND;TZID=UTC:{end.strftime("%Y%m%dT%H%M%S")}
 LOCATION:{location}
 TZID:UTC
 END:VEVENT
@@ -441,8 +441,8 @@ def get_ical_string_for_event(start: datetime.datetime, end: datetime.datetime, 
 BEGIN:VEVENT
 SUMMARY:{summary}
 LOCATION:{location}
-DTSTART:{start.strftime("%Y%m%dT%H%M%S")}
-DTEND:{end.strftime("%Y%m%dT%H%M%S")}
+DTSTART;TZID=UTC:{start.strftime("%Y%m%dT%H%M%S")}
+DTEND;TZID=UTC:{end.strftime("%Y%m%dT%H%M%S")}
 TZID:UTC
 END:VEVENT
 END:VCALENDAR
