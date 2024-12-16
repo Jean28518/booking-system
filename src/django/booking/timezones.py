@@ -67,16 +67,9 @@ for city, tz in common_timezones.items():
     common_timezones_array_of_dicts.append({"city": city, "tz": tz})
 
 
-def convert_time_from_local_to_local(
-    time: datetime, from_tz: str, to_tz: str
-):
-    from_tz = pytz.timezone(from_tz)
-    to_tz = pytz.timezone(to_tz)
-    time = from_tz.localize(time)
-    time = time.astimezone(to_tz)
-    return time
-
 def convert_time_from_local_to_utc(time: datetime, from_tz):
+    if time == None:
+        return None
     if to_tz == None:
         to_tz = "UTC"
     if not type(from_tz) == str:
@@ -88,6 +81,8 @@ def convert_time_from_local_to_utc(time: datetime, from_tz):
 
 
 def convert_time_from_utc_to_local(time: datetime, to_tz):
+    if time == None:
+        return None
     if to_tz == None:
         to_tz = "UTC"
     if not type(to_tz) == str:
