@@ -6,7 +6,7 @@ from django.core.mail import send_mail, EmailMessage
 from django.http import HttpResponse
 import root.templates as templates
 import datetime
-from booking.timezones import common_timezones_array_of_dicts
+from booking.timezones import common_timezones_array_of_dicts, convert_time_from_local_to_utc, convert_time_from_utc_to_local
 
 
 from .models import Calendar, Ticket
@@ -118,12 +118,14 @@ def ticket_customer_view(request, guid):
     _load_timezone_for_request(request)
     ticket = Ticket.objects.get(guid=guid)
     if ticket.current_date:
-        date_display = ticket.current_date.strftime("%d.%m.%Y")
-        start_time_display = ticket.current_date.strftime("%H:%M")
+        ticket_datetime = ticket.current_date
+        ticket_datetime_customer = convert_time_from_utc_to_local(ticket_datetime, request.session["django_timezone"])
+        date_display = ticket_datetime_customer.strftime("%d.%m.%Y")
+        start_time_display = ticket_datetime_customer.strftime("%H:%M")
         duration_display = ticket.duration.seconds // 60
         jitsi_link = booking.booking.get_jitsi_link_for_ticket(ticket)
         return render(request, "booking/ticket_customer_view.html", {"ticket": ticket, "date_display": date_display, "start_time_display": start_time_display, "duration_display": duration_display, "jitsi_link": jitsi_link, "timezones": common_timezones_array_of_dicts})
-    weeks = booking.calendar.get_available_slots_for_ticket(ticket)
+    weeks = booking.calendar.get_available_slots_for_ticket(ticket, request.session["django_timezone"])
     slots = []
     for week in weeks:
         for day in week:
@@ -138,25 +140,35 @@ def ticket_customer_view(request, guid):
 
 @login_required()
 def tickets(request):
+    _load_timezone_for_request(request)
     tickets = Ticket.objects.filter(assigned_user=request.user)
     tickets = list(tickets)
     # Sort tickets by creation. The newest ticket should be on top.
     # (The id is automatically incremented by the database, so we can use this as a timestamp for the creation date.)
     tickets.sort(key=lambda x: x.id, reverse=True)
-    print(tickets)
+    ticket_dicts = []
+    for ticket in tickets:
+        ticket_dict = {
+            "name": ticket.name,
+            "duration": ticket.duration,
+            "current_date": ticket.current_date,
+            "current_date_ticket_user": convert_time_from_utc_to_local(ticket.current_date, ticket.assigned_user.profile.timezone),
+            "guid": ticket.guid,
+        }
+        ticket_dicts.append(ticket_dict)
     overview = templates.process_overview_dict({
         "heading": "Tickets",
         "element_name": "Ticket",
-        "elements": tickets,
+        "elements": ticket_dicts,
         "element_url_key": "guid",
         "t_headings": ["Name", "Dauer", "Gebuchtes Datum"],
-        "t_keys": ["name", "duration", "current_date"],
+        "t_keys": ["name", "duration", "current_date_ticket_user"],
         "add_url_name": "index",
         "edit_url_name": "edit_ticket", 
         "delete_url_name": "delete_ticket",
         "hint": "Tickets können auch über den Link geteilt werden",
     })
-    return render(request, 'root/overview_x.html', {"overview": overview})
+    return render(request, 'root/overview_x.html', {"overview": overview, "timezones": common_timezones_array_of_dicts})
 
 
 @login_required()
@@ -213,10 +225,21 @@ def booking_settings(request):
 
     
 def select_slot(request, guid, date, start_time):
+    _load_timezone_for_request(request)
     ticket = Ticket.objects.get(guid=guid)
     start_time = datetime.datetime.strptime(start_time, "%H:%M:%S").time()
     date = datetime.datetime.strptime(date, "%Y-%m-%d").date()
     duration_display = ticket.duration.seconds // 60
+
+    # Convert it to utc
+    start_time_customer = start_time
+    date_customer = date
+
+    start_time = convert_time_from_local_to_utc(datetime.datetime.combine(date, start_time), request.session["django_timezone"]).time()
+    date = convert_time_from_local_to_utc(datetime.datetime.combine(date, start_time), request.session["django_timezone"]).date()
+
+    start_time_ticket_user = convert_time_from_utc_to_local(datetime.datetime.combine(date, start_time), ticket.assigned_user.profile.timezone).time()
+    date_ticket_user = convert_time_from_utc_to_local(datetime.datetime.combine(date, start_time), ticket.assigned_user.profile.timezone).date()
 
     if request.method == "POST":
         # Check if the selected slot is still available (disabled because of some errors, we get)
@@ -230,27 +253,31 @@ def select_slot(request, guid, date, start_time):
         session_now = datetime.datetime.strptime(request.session["now"], "%Y-%m-%d %H:%M:%S")
         if (datetime.datetime.now() - session_now).seconds > 300:
             return templates.message(request, "Ihre Sitzung ist abgelaufen. Bitte wählen Sie erneut einen Slot.", "ticket_customer_view", [guid])
-        # Also check if the date and start_time can be found in the presendet slots
+        # Also check if the date and start_time_customer can be found in the presented slots
         slot_found = False
         for slot in request.session.get("slots", []):
-            if slot[0] == date.strftime("%d.%m.%Y") and slot[1] == start_time.strftime("%H:%M:%S"):
+            if slot[0] == date_customer.strftime("%d.%m.%Y") and slot[1] == start_time_customer.strftime("%H:%M:%S"):
                 slot_found = True
                 break
         if not slot_found:
             return templates.message(request, "Ein Fehler ist aufgetreten. Bitte wählen Sie einen anderen Slot!", "ticket_customer_view", [guid])
+        
+       
 
         ticket.current_date = datetime.datetime.combine(date, start_time)
         ticket.email_of_customer = request.POST.get("email", "")
         ticket.save()
         booking.calendar.book_ticket(guid)
         assigned_user = ticket.assigned_user
-        current_date = ticket.current_date
+        current_datetime = ticket.current_date
+        current_datetime_ticket_user = datetime.datetime.combine(date_ticket_user, start_time_ticket_user)
+        current_datetime_customer = datetime.datetime.combine(date_customer, start_time_customer)
         meeting_link_description = ""
         if ticket.generate_jitsi_link:
             meeting_link_description = f"\nLink zum Meeting (Jitsi): {booking.booking.get_jitsi_link_for_ticket(ticket)}"
         send_mail(
-            'Termin "' + ticket.name + '" gebucht. Datum: ' + current_date.strftime("%d.%m.%Y %H:%M") + ' Uhr.',
-            f'Der Termin wurde am {ticket.current_date.strftime("%d.%m.%Y um %H:%M")} Uhr gebucht.' + meeting_link_description,
+            'Termin "' + ticket.name + '" gebucht. Datum: ' + current_datetime_ticket_user.strftime("%d.%m.%Y %H:%M") + ' Uhr.',
+            f'Der Termin wurde am {current_datetime_ticket_user.strftime("%d.%m.%Y um %H:%M")} Uhr gebucht.' + meeting_link_description,
             settings.EMAIL_HOST_USER,
             [assigned_user.email],
             fail_silently=True,
@@ -259,8 +286,8 @@ def select_slot(request, guid, date, start_time):
         attachment_ics = booking.calendar.get_ical_string_for_ticket(ticket.guid)
         if ticket.email_of_customer:
             email = EmailMessage(
-                f'{ticket_description} gebucht. Datum: ' + current_date.strftime("%d.%m.%Y %H:%M") + ' Uhr.',
-                f'{ticket_description} wurde am {ticket.current_date.strftime("%d.%m.%Y um %H:%M")} Uhr mit einer Dauer von {duration_display} Minuten gebucht.{meeting_link_description}\n\nTipp: Sie können den Termin jeder Zeit über folgenden Link verwalten: {settings.BASE_URL + reverse("ticket_customer_view", args=[guid])}',
+                f'{ticket_description} gebucht. Datum: ' + current_datetime_customer.strftime("%d.%m.%Y %H:%M") + ' Uhr.',
+                f'{ticket_description} wurde am {current_datetime_customer.strftime("%d.%m.%Y um %H:%M")} Uhr mit einer Dauer von {duration_display} Minuten gebucht.{meeting_link_description}\n\nTipp: Sie können den Termin jeder Zeit über folgenden Link verwalten: {settings.BASE_URL + reverse("ticket_customer_view", args=[guid])}',
                 settings.EMAIL_HOST_USER,
                 [ticket.email_of_customer],
             )
@@ -268,8 +295,9 @@ def select_slot(request, guid, date, start_time):
             email.send()
         return redirect("ticket_customer_view", guid=guid)
 
-    start_time_display = start_time.strftime("%H:%M")
-    date_display = date.strftime("%d.%m.%Y")
+    # Now we are back again in customer timezone:
+    start_time_display = start_time_customer.strftime("%H:%M")
+    date_display = date_customer.strftime("%d.%m.%Y")
     email_of_customer = ""
     if ticket.email_of_customer:
         email_of_customer = ticket.email_of_customer
@@ -277,13 +305,16 @@ def select_slot(request, guid, date, start_time):
 
 
 def customer_cancel_ticket(request, guid):
+    _load_timezone_for_request(request)
     ticket = Ticket.objects.get(guid=guid)
-    current_date = ticket.current_date
+    current_datetime = ticket.current_date
+    current_datetime_ticket_user = convert_time_from_utc_to_local(current_datetime, ticket.assigned_user.profile.timezone)
+    current_datetime_customer = convert_time_from_utc_to_local(current_datetime, request.session["django_timezone"])
     booking.calendar.remove_booking(guid)
     assigned_user = ticket.assigned_user
     send_mail(
         'Termin "' + ticket.name + '" storniert.',
-        f'Der Termin am {current_date.strftime("%d.%m.%Y um %H:%M")} Uhr wurde storniert.',
+        f'Der Termin am {current_datetime_ticket_user.strftime("%d.%m.%Y um %H:%M")} Uhr wurde storniert.',
         settings.EMAIL_HOST_USER,
         [assigned_user.email],
         fail_silently=True,
@@ -291,8 +322,8 @@ def customer_cancel_ticket(request, guid):
     ticket_description = booking.booking.get_ticket_description_for_customer(ticket)
     if ticket.email_of_customer:
         send_mail(
-            f'{ticket_description} storniert. Datum: {current_date.strftime("%d.%m.%Y um %H:%M")} Uhr.',
-            f'{ticket_description} am {current_date.strftime("%d.%m.%Y um %H:%M")} Uhr wurde storniert.\n\nTipp: Sie können den Termin jeder Zeit über folgenden Link neu buchen: {settings.BASE_URL + reverse("ticket_customer_view", args=[guid])}',
+            f'{ticket_description} storniert. Datum: {current_datetime_customer.strftime("%d.%m.%Y um %H:%M")} Uhr.',
+            f'{ticket_description} am {current_datetime_customer.strftime("%d.%m.%Y um %H:%M")} Uhr wurde storniert.\n\nTipp: Sie können den Termin jeder Zeit über folgenden Link neu buchen: {settings.BASE_URL + reverse("ticket_customer_view", args=[guid])}',
             settings.EMAIL_HOST_USER,
             [ticket.email_of_customer],
             fail_silently=True,
@@ -302,18 +333,21 @@ def customer_cancel_ticket(request, guid):
 
 def customer_change_date(request, guid):
     """We remove the booking of the ticket and redirect to the booking page. The user can then select a new date."""
+    _load_timezone_for_request(request)
     ticket = Ticket.objects.get(guid=guid)
-    last_date = ticket.current_date
+    last_datetime = ticket.current_date
+    last_datetime_ticket_user = convert_time_from_utc_to_local(last_datetime, ticket.assigned_user.profile.timezone)
+    last_datetime_customer = convert_time_from_utc_to_local(last_datetime, request.session["django_timezone"])
     booking.calendar.remove_booking(guid)
     assigned_user = ticket.assigned_user
     send_mail(
         'Termin "' + ticket.name + '" wird verschoben...',
-        f'Der Termin wurde vom {last_date.strftime("%d.%m.%Y um %H:%M")} Uhr wurde abgesagt.\nDer Nutzer wird nun aufgefordert, einen neuen Termin zu buchen.',
+        f'Der Termin wurde vom {last_datetime_ticket_user.strftime("%d.%m.%Y um %H:%M")} Uhr wurde abgesagt.\nDer Nutzer wird nun aufgefordert, einen neuen Termin zu buchen.',
         settings.EMAIL_HOST_USER,
         [assigned_user.email],
         fail_silently=True,
     )
-    return redirect("ticket_customer_view", guid=guid)
+    return templates.message(request, "Terminänderung: Bisheriger Termin erfolgreich storniert. Bitte wählen Sie einen neuen Termin.", "ticket_customer_view", [guid])
 
 
 def set_timezone(request):

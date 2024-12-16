@@ -31,7 +31,7 @@ class TicketForm(forms.ModelForm):
         labels = {
             'name': 'Name',
             'first_available_date': 'Erstes verfügbares Datum',
-            'duration': 'Dauer (Minuten)',
+            'duration': 'Dauer (Stunden)',
             'expiry': 'Ablaufdatum',
             'generate_jitsi_link': 'Generate Jitsi Link',
         }

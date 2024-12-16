@@ -3,6 +3,8 @@ import base64
 import datetime
 from dateutil.relativedelta import relativedelta
 from urllib.parse import unquote
+from booking.timezones import common_timezones_array_of_dicts, convert_time_from_local_to_utc
+import pytz
 
 def day_to_number(day: str):
     if day == "MO":
@@ -22,6 +24,7 @@ def day_to_number(day: str):
     return -1
 
 def get_events_from_response(response : str):
+    """Get them all converted to utc"""
     lines = response.split("\n")
     events = []
     # Find first event
@@ -33,9 +36,15 @@ def get_events_from_response(response : str):
         if line.startswith("BEGIN:VEVENT"):
             event = {}
             while not line.startswith("END:VEVENT"):
+                if "TZID" in line:
+                    # Try every timezone:
+                    for tz in common_timezones_array_of_dicts:
+                        if tz["city"] in line or tz["tz"] in line:
+                            event["tz"] = tz["tz"]
+                            break
                 if line.startswith("DTSTART"):
                     start = line.split(":")[1]
-                    start = start.split("Z")[0]
+                    start = start.split("Z")[0] 
                     start = start.strip()
                     if "T" in start:
                         event["start"] = datetime.datetime.strptime(start, "%Y%m%dT%H%M%S")
@@ -96,7 +105,7 @@ def get_events_from_response(response : str):
                 print("Event is missing information: " + str(event))
 
 
-    # Parse the rrules and generate every occurence of the event (maximum 1 year in the future)
+    # Parse the rules and generate every occurence of the event (maximum 1 year in the future)
     for event in events:
         if "rrule" in event:
             rrule = event["rrule"]
@@ -274,6 +283,21 @@ def get_events_from_response(response : str):
 
     for event in events_to_remove:
         events.remove(event)
+
+    # Convert all events to UTC
+    for event in events:
+        if "tz" in event:
+            event["start"] = convert_time_from_local_to_utc(event["start"], event["tz"])
+            event["end"] = convert_time_from_local_to_utc(event["end"], event["tz"])
+            del event["tz"]
+        else:
+            # event["start"] = convert_time_from_local_to_utc(event["start"], "UTC")
+            # event["end"] = convert_time_from_local_to_utc(event["end"], "UTC")
+            # Because some appointments do not have a timezone set at my caldav server, we assume it to Berlin.
+            # In the future we should change this to UTC :)
+            event["start"] = convert_time_from_local_to_utc(event["start"], "Europe/Berlin")
+            event["end"] = convert_time_from_local_to_utc(event["end"], "Europe/Berlin")
+
     return events
 
 events_cache = {}
@@ -308,15 +332,7 @@ def get_all_caldav_events(caldav_adress, username: str=None, password: str=None)
             return get_events_from_response(ics_content.decode("utf-8"))
         else:
             print(f"Error retrieving events: {response.status}")
-            return []
    
-    # Startdate: one week ago, format YYYY-MM-DD
-    start_date = (datetime.datetime.now() - datetime.timedelta(days=7)).strftime("%Y%m%d")
-    # Enddate: four weeks from now, format YYYY-MM-DD
-    end_date = (datetime.datetime.now() + datetime.timedelta(weeks=4)).strftime("%Y%m%d")
-
-
-
     # Build XML body
     xml_body = f"""
     <c:calendar-query xmlns:d="DAV:" xmlns:c="urn:ietf:params:xml:ns:caldav">
@@ -380,6 +396,7 @@ SUMMARY:{summary}
 DTSTART:{start.strftime("%Y%m%dT%H%M%S")}
 DTEND:{end.strftime("%Y%m%dT%H%M%S")}
 LOCATION:{location}
+TZID:UTC
 END:VEVENT
 END:VCALENDAR
 """
@@ -426,6 +443,7 @@ SUMMARY:{summary}
 LOCATION:{location}
 DTSTART:{start.strftime("%Y%m%dT%H%M%S")}
 DTEND:{end.strftime("%Y%m%dT%H%M%S")}
+TZID:UTC
 END:VEVENT
 END:VCALENDAR
 """

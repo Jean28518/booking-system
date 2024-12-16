@@ -8,6 +8,7 @@ from .models import Ticket, BookingSettings
 import booking.booking as booking
 import locale
 import pytz
+from booking.timezones import common_timezones, convert_time_from_local_to_utc, convert_time_from_utc_to_local
 
 def time_to_quarter(time):
     return time.hour * 4 + time.minute // 15
@@ -25,7 +26,7 @@ def is_quarter_30(quarter):
     return quarter % 4 == 2
 
 def get_free_slots(events, start_time: datetime.datetime, end_time: datetime.datetime):
-    """Returns a list of days, which is containing a list of free quarters for each day."""
+    """Returns a list of days, which is containing a list of free quarters for each day. All times are in utc."""
 
     # Remove all events which beginnings and endings are outside the time frame and keep only these which are marked as busy
     events = [event for event in events if event["start"] < end_time and event["end"] > start_time and event["busy"]]
@@ -60,20 +61,23 @@ def get_free_slots(events, start_time: datetime.datetime, end_time: datetime.dat
     return days
 
 
-def get_available_slots_for_ticket(ticket):
-    """Returns a list of weeks, which is containing a list of days, which is containing available slots for the ticket."""
+def get_available_slots_for_ticket(ticket, timezone: str):
+    """Returns a list of weeks, which is containing a list of days, which is containing available slots for the ticket. All returned slots are in the asked timezone."""
     # Get all calendars of the user
     calendars = Calendar.objects.filter(assigned_user=ticket.assigned_user)
+    settings = booking.get_booking_settings_for_user(ticket.assigned_user)
+    utc_timezone = pytz.timezone("UTC")
+    timezone = pytz.timezone(timezone)
+    ticket_user_local_timezone = ticket.assigned_user.profile.timezone
     # Get all events of all the calendars
     events = []
     for cal in calendars:
         events += caldav.get_all_caldav_events(cal.url, cal.username, cal.password)
     # Convert the first_available_date to a datetime object
-    first_possible_datetime = datetime.datetime.combine(ticket.first_available_date, datetime.time(0, 0))
-    if first_possible_datetime < datetime.datetime.now():
-        first_possible_datetime = datetime.datetime.now() + datetime.timedelta(minutes=15)
-    settings = booking.get_booking_settings_for_user(ticket.assigned_user)
-    days = get_free_slots(events, first_possible_datetime, datetime.datetime.now() + datetime.timedelta(days=settings.maximum_future_booking_time))
+    first_possible_datetime = convert_time_from_local_to_utc(datetime.datetime.combine(ticket.first_available_date, datetime.time(0, 0)), ticket_user_local_timezone)
+    if first_possible_datetime < datetime.datetime.now(utc_timezone):
+        first_possible_datetime = datetime.datetime.now(utc_timezone) + datetime.timedelta(minutes=15)
+    days = get_free_slots(events, first_possible_datetime, datetime.datetime.now(utc_timezone) + datetime.timedelta(days=settings.maximum_future_booking_time))
     print_days_with_free_slots(days)
     duration = ticket.duration
     # Make sure that duration is in a 15 minute interval, e.g. 17 minutes will be extended to 30 minutes
@@ -82,14 +86,14 @@ def get_available_slots_for_ticket(ticket):
     # Get duration in quarters
     duration_in_quarters = duration.seconds // 900
     # Remove all days which are not in the future
-    timezone = pytz.timezone("Europe/Berlin") 
     days = [day for day in days if day["date"] >= datetime.datetime.now(timezone).date()]
     
-    earliest_booking_time = settings.earliest_booking_time
-    latest_booking_end = settings.latest_booking_end
+    
     
     # Remove all slots which are not in the time frame between earliest_booking_time and latest_booking_end
     for day in days:
+        earliest_booking_time = convert_time_from_local_to_utc(datetime.datetime.combine(day["date"], settings.earliest_booking_time), ticket_user_local_timezone).time()
+        latest_booking_end = convert_time_from_local_to_utc(datetime.datetime.combine(day["date"], settings.latest_booking_end), ticket_user_local_timezone).time()
         day["free_slots"] = [slot for slot in day["free_slots"] if quarter_to_time(slot) >= earliest_booking_time and quarter_to_time(slot) < latest_booking_end]
     
     for day in days:
@@ -139,13 +143,49 @@ def get_available_slots_for_ticket(ticket):
         # If day is today, add "Heute" to the title
         if day["date"] == datetime.datetime.now(timezone).date():
             day["title"] = "Heute, " + day["title"]
-            # Remove all slots which are in the past (here our timezone is Berlin, so we can use the timezone directly)
-            # We remove the slots here, because above we would have issues by comparing "different" timezones
-            # We can't set everything to the real timezone, because apparently the database is not timezone aware
-            day["slots"] = [slot for slot in day["slots"] if time_to_quarter(slot["start"]) > time_to_quarter((datetime.datetime.now(timezone) + datetime.timedelta(minutes=15)).time())]
+            # Remove all slots which are in the past
+            day["slots"] = [slot for slot in day["slots"] if time_to_quarter(slot["start"]) > time_to_quarter((datetime.datetime.now() + datetime.timedelta(minutes=15)).time())]
         # If day is tomorrow, add "Morgen" to the title
         if day["date"] == datetime.datetime.now(timezone).date() + datetime.timedelta(days=1):
             day["title"] = "Morgen, " + day["title"]
+
+        ## Remove all the slots which are on a day the user excluded in the settings
+        slots_to_remove = []
+        for slot in day["slots"]:
+            weekday = convert_time_from_utc_to_local(datetime.datetime.combine(day["date"], slot["start"]), ticket_user_local_timezone).weekday()
+            if weekday == 0 and not settings.monday:
+                slots_to_remove.append(slot)
+            if weekday == 1 and not settings.tuesday:
+                slots_to_remove.append(slot)
+            if weekday == 2 and not settings.wednesday:
+                slots_to_remove.append(slot)
+            if weekday == 3 and not settings.thursday:
+                slots_to_remove.append(slot)
+            if weekday == 4 and not settings.friday:
+                slots_to_remove.append(slot)
+            if weekday == 5 and not settings.saturday:
+                slots_to_remove.append(slot)
+            if weekday == 6 and not settings.sunday:
+                slots_to_remove.append(slot)
+        day["slots"] = [slot for slot in day["slots"] if slot not in slots_to_remove]
+          
+    
+    ## Now we convert the slots to the timezone of the user ##############################################
+    # We move all the slots to a single list
+    # Then we convert all the slots to the timezone of the user. (For the start and end time, AND for the date)
+    # Then we sort all slots back into the days
+    all_slots = []
+    for day in days:
+        for slot in day["slots"]:
+            slot["date"] = day["date"]
+            all_slots.append(slot)
+    for slot in all_slots:
+        slot["start"] = convert_time_from_utc_to_local(datetime.datetime.combine(slot["date"], slot["start"]), timezone).time()
+        slot["end"] = convert_time_from_utc_to_local(datetime.datetime.combine(slot["date"], slot["end"]), timezone).time()
+        slot["date"] = convert_time_from_utc_to_local(datetime.datetime.combine(slot["date"], slot["start"]), timezone).date()
+    # Now we sort all slots back into the days
+    for day in days:
+        day["slots"] = [slot for slot in all_slots if slot["date"] == day["date"]]
     
     # Now generate a list of weeks
     # Make sure, the first week also has 7 days
@@ -167,29 +207,6 @@ def get_available_slots_for_ticket(ticket):
         for i in range(7 - len(current_week)):
             current_week.append(empty_day)
         weeks.append(current_week)
-
-    # Now we check, which days are excluded by the user in the settings:
-    if settings.sunday == False:
-        for week in weeks:
-            week.pop(6)
-    if settings.saturday == False:
-        for week in weeks:
-            week.pop(5)
-    if settings.friday == False:
-        for week in weeks:
-            week.pop(4)
-    if settings.thursday == False:
-        for week in weeks:
-            week.pop(3)
-    if settings.wednesday == False:
-        for week in weeks:
-            week.pop(2)
-    if settings.tuesday == False:
-        for week in weeks:
-            week.pop(1)
-    if settings.monday == False:
-        for week in weeks:
-            week.pop(0)
 
     # Now if a week is empty, we remove it
     weeks = [week for week in weeks if not all([day["date"] == None for day in week])]
