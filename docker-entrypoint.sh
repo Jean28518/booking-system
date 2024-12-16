@@ -3,7 +3,10 @@
 apt-get update
 apt-get install -y gettext locales
 
-echo "de_DE.UTF-8 UTF-8" >> /etc/locale.gen
+# if "de_DE.UTF-8 UTF-8" not in /etc/locale.gen
+if ! grep -q "de_DE.UTF-8 UTF-8" /etc/locale.gen; then
+    echo "de_DE.UTF-8 UTF-8" >> /etc/locale.gen
+fi
 locale-gen
 
 pip install --upgrade pip
