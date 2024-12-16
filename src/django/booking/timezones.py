@@ -70,8 +70,8 @@ for city, tz in common_timezones.items():
 def convert_time_from_local_to_utc(time: datetime, from_tz):
     if time == None:
         return None
-    if to_tz == None:
-        to_tz = "UTC"
+    if from_tz == None:
+        from_tz = "UTC"
     if not type(from_tz) == str:
         from_tz = from_tz.zone
     from_tz = pytz.timezone(from_tz)
