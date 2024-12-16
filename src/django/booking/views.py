@@ -116,7 +116,11 @@ def delete_calendar(request, calendar_id):
 
 def ticket_customer_view(request, guid):
     _load_timezone_for_request(request)
-    ticket = Ticket.objects.get(guid=guid)
+    # Look if ticket exists
+    try:
+        ticket = Ticket.objects.get(guid=guid)
+    except Ticket.DoesNotExist:
+        return templates.message(request, "Das Ticket ist leider abgelaufen.", "index")
     if ticket.current_date:
         ticket_datetime = ticket.current_date
         ticket_datetime_customer = convert_time_from_utc_to_local(ticket_datetime, request.session["django_timezone"])
