@@ -118,12 +118,14 @@ def get_available_slots_for_ticket(ticket, timezone: str, request):
         # Now lets create a list of available slots
         # For that we remove the amount of quarters of the duration from the end of the cluster
         for cluster in available_clusters:
-            cluster = cluster[:-duration_in_quarters + 1]
+            # If the ticket is longer than 15 minutes then we have to remove the length of the ticket in the end.
+            # Because otherwise we would have a ticket which exeecds the working hours
+            if duration_in_quarters < 1:
+                cluster = cluster[:-duration_in_quarters + 1]
             for slot in cluster:
                 day["slots"].append(slot)
 
         # Now we should be finished with the slot finding
-                
         # If there are more options than 5 we remove all slots which are either at :15, or :45
         if len(day["slots"]) > 5:
             day["slots"] = [slot for slot in day["slots"] if not is_quarter_15_or_45(slot)]

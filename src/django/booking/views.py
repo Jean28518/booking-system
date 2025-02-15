@@ -218,7 +218,7 @@ def booking_settings(request):
     if request.method == "POST":
         form = forms.BookingSettingsForm(request.POST, instance=settings)
         if form.is_valid():
-            settings = form.save(commit(False))
+            settings = form.save(commit=False)
             settings.assigned_user = request.user
             settings.save()
             message = _("Changes saved.")
