@@ -28,6 +28,10 @@ class Ticket(models.Model):
     email_of_customer = models.EmailField(max_length=200, null=True, blank=True)
     caldav_event_uid = models.CharField(max_length=200, null=True, blank=True)
     guid = models.CharField(max_length=200, null=True, blank=True)
+    parent_ticket = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
+    """This ticket is then owned by a recurring ticket."""
+    recurring = models.BooleanField(default=False)
+    """If true, the ticket will only be the entrypoint for creating tickets on their own. Their maximum duration will be limited to the duration of this ticket."""
 
     def __str__(self):
         return self.name

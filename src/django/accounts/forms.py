@@ -27,3 +27,4 @@ class ProfileForm(forms.Form):
 
 class AdminSettingsForm(forms.Form):
     enable_registration = forms.BooleanField(label=_("Enable registration"), required=False)
+    skip_ssl_check = forms.BooleanField(label=_("Skip SSL check"), required=False)

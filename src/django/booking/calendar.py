@@ -295,11 +295,11 @@ def book_ticket(ticket_guid):
     ticket.save()
 
 
-def get_ical_string_for_ticket(ticket_guid):
+def get_ical_string_for_ticket(ticket_guid, append_description = ""):
     """Returns the ical string for the ticket."""
     ticket = Ticket.objects.get(guid=ticket_guid)
     start = ticket.current_date
     end = ticket.current_date + ticket.duration
-    summary = booking.get_ticket_description_for_customer(ticket)
+    summary = booking.get_ticket_description_for_customer(ticket) + append_description
     jitsi_link = booking.get_jitsi_link_for_ticket(ticket)
     return caldav.get_ical_string_for_event(start, end, summary, jitsi_link)

@@ -29,13 +29,14 @@ class TicketForm(forms.ModelForm):
 
     class Meta:
         model = Ticket
-        fields = ['name', 'first_available_date', 'duration', 'expiry', 'generate_jitsi_link']
+        fields = ['name', 'first_available_date', 'duration', 'expiry', 'generate_jitsi_link', 'recurring']
         labels = {
             'name': _('Name'),
             'first_available_date': _('First available date'),
             'duration': _('Duration (Hours)'),
             'expiry': _('Expiry date'),
             'generate_jitsi_link': _('Generate jitsi link'),
+            'recurring': _('Recurring (this ticket will allow booking multiple appointments)'),
         }
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
@@ -43,6 +44,7 @@ class TicketForm(forms.ModelForm):
             'duration': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time', 'aria-label': "Time"}),
             'expiry': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'aria-label': "Date"}, format='%Y-%m-%d'),
             'generate_jitsi_link': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'recurring': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 
 
@@ -76,3 +78,10 @@ class BookingSettingsForm(forms.ModelForm):
             'jitsi_server': forms.URLInput(attrs={'class': 'form-control'}),
             'maximum_future_booking_time': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
         }
+
+
+class TicketCustomerForm(forms.Form):
+    description = forms.CharField(label=_('Description'), required=True)
+    generate_jitsi_link = forms.BooleanField(label=_('Create Jitsi link'), required=False, widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
+    # Selection field for the duration of the appointment (15 minutes, 30 minutes, 1 hour, 1.5 hours, 2 hours, 3 hours, 4 hours, 5 hours, 6 hours, 7 hours, 8 hours)
+    duration = forms.ChoiceField(label=_('Duration') + " (" + _("minutes") + ")", choices=[(15, '15'), (30, '30'), (45, '30'), (60, '60'), (90, '90'), (120, '120'), (180, '180'), (240, '240'), (300, '300'), (360, '360'), (420, '420'), (480, '480')], widget=forms.Select(attrs={'class': 'form-control'}))

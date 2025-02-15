@@ -24,4 +24,6 @@ urlpatterns = [
 
     path("select_slot/<str:guid>/<str:date>/<str:start_time>/", views.select_slot, name="select_slot"),
 
+    path("recurring_ticket/<str:guid>/", views.recurring_ticket, name="recurring_ticket"),
+    path("create_ticket_from_recurring/<str:guid>/", views.create_ticket_from_recurring, name="create_ticket_from_recurring"),
 ]

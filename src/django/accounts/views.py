@@ -166,8 +166,11 @@ def admin_settings(request):
         form = forms.AdminSettingsForm(request.POST)
         if form.is_valid():
             cfg.set_value("enable_registration", form.cleaned_data["enable_registration"])
+            cfg.set_value("skip_ssl_check", form.cleaned_data["skip_ssl_check"])
             message = _("Settings saved.")
         else:
             message = _("Invalid input")
     form.fields["enable_registration"].initial = cfg.get_value("enable_registration", False)
+    form.fields["skip_ssl_check"].initial = cfg.get_value("skip_ssl_check", False)
+
     return render(request, 'root/generic_form.html', {"title": _("Administrator settings"), "form": form, "back": reverse("index"), "submit": _("Save"), "message": message})

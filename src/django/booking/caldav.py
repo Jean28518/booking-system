@@ -5,6 +5,7 @@ from dateutil.relativedelta import relativedelta
 from urllib.parse import unquote
 from booking.timezones import common_timezones_array_of_dicts, convert_time_from_local_to_utc
 import pytz
+import cfg.cfg as cfg
 
 def day_to_number(day: str):
     if day == "MO":
@@ -23,13 +24,32 @@ def day_to_number(day: str):
         return 6
     return -1
 
+def _parse_datetime(datetimes: str):
+    datetimes = datetimes.strip()
+    datetimes = datetimes.split("Z")[0]
+    if "T" in datetimes:
+        try:
+            return datetime.datetime.strptime(datetimes, "%Y%m%dT%H%M%S")
+        except:
+            datetimes = datetimes.split("T")[0]
+            return datetime.datetime.strptime(datetimes, "%Y%m%d")
+    elif len(datetimes) == 8:
+        return datetime.datetime.strptime(datetimes, "%Y%m%d")
+    else:
+        print("Could not parse datetime: " + str(datetimes))
+        return None
+    
 def get_events_from_response(response : str):
     """Get them all converted to utc"""
     lines = response.split("\n")
     events = []
     # Find first event
+    if len(lines) == 0:
+        return []
     while not lines[0].startswith("BEGIN:VEVENT"):
         lines.pop(0)
+        if len(lines) == 0:
+            return []
     # Now we are at the first event
     while(len(lines) > 0):
         line = lines.pop(0)
@@ -44,20 +64,10 @@ def get_events_from_response(response : str):
                             break
                 if line.startswith("DTSTART"):
                     start = line.split(":")[1]
-                    start = start.split("Z")[0] 
-                    start = start.strip()
-                    if "T" in start:
-                        event["start"] = datetime.datetime.strptime(start, "%Y%m%dT%H%M%S")
-                    else:
-                        event["start"] = datetime.datetime.strptime(start, "%Y%m%d")
+                    event["start"] = _parse_datetime(start)
                 elif line.startswith("DTEND"):
                     end = line.split(":")[1]
-                    end = end.split("Z")[0]
-                    end = end.strip()
-                    if "T" in end:
-                        event["end"] = datetime.datetime.strptime(end, "%Y%m%dT%H%M%S")
-                    else:
-                        event["end"] = datetime.datetime.strptime(end, "%Y%m%d")
+                    event["end"] = _parse_datetime(end)
                 elif line.startswith("SUMMARY"):
                     event["summary"] = line.split(":")[1]
                 elif line.startswith("RRULE"):
@@ -76,10 +86,10 @@ def get_events_from_response(response : str):
                     exdate = exdate.split("Z")[0].strip()
                     if not event.get("exdate", None):
                         event["exdate"] = []
-                    if len(exdate) == 8:
-                        event["exdate"].append(datetime.datetime.strptime(exdate, "%Y%m%d"))
-                    elif len(exdate) == 15:
-                        event["exdate"].append(datetime.datetime.strptime(exdate, "%Y%m%dT%H%M%S"))
+                    exdate_entry = _parse_datetime(exdate)
+                    if exdate_entry:
+                        event["exdate"].append(exdate_entry)
+                    
                 # elif line.startswith("DESCRIPTION"):
                 #     event["description"] = line.split(":")[1]
                 #     # Description can be multiline
@@ -320,6 +330,8 @@ def get_all_caldav_events(caldav_adress, username: str=None, password: str=None)
     if get_cached_events(caldav_adress, username):
         return get_cached_events(caldav_adress, username)
     http = httplib2.Http()
+    if cfg.get_value("skip_ssl_check", False):
+        http.disable_ssl_certificate_validation = True
 
     if caldav_adress.endswith(".ics"):
         headers = {
@@ -378,6 +390,9 @@ def get_all_caldav_events(caldav_adress, username: str=None, password: str=None)
 
 def create_caldav_event(start: datetime.datetime, end: datetime.datetime, uid: str,  summary: str, caldav_address: str, username: str=None, password: str=None, location: str = ""):
     http = httplib2.Http()
+    if cfg.get_value("skip_ssl_check", False):
+        http.disable_ssl_certificate_validation = True
+
     headers = {
         "Content-Type": "text/calendar",
     }
@@ -413,6 +428,8 @@ END:VCALENDAR
     
 def delete_caldav_event(uid: str, caldav_address: str, username: str=None, password: str=None):
     http = httplib2.Http()
+    if cfg.get_value("skip_ssl_check", False):
+        http.disable_ssl_certificate_validation = True
     headers = {
         "Content-Type": "text/calendar",
     }
@@ -424,10 +441,18 @@ def delete_caldav_event(uid: str, caldav_address: str, username: str=None, passw
     if username and password:
         # Add Basic Authentication header
         headers["Authorization"] = "Basic " + base64.b64encode(f"{username}:{password}".encode("utf-8")).decode("utf-8")
-    response, content = http.request(
-        caldav_address, "DELETE", headers=headers
-    )
-    if response.status == 204:
+
+    # Let's try to delete multiple events, because sometimes some calendars are having multiple events of this ticket.
+    deletion_success = False
+    while True:
+        response, content = http.request(
+            caldav_address, "DELETE", headers=headers
+        )
+        if response.status == 204:
+            deletion_success = True
+        else:
+            break
+    if deletion_success:
         return True
     else:
         print(f"Error deleting event: {response.status}")

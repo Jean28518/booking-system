@@ -3,7 +3,7 @@ from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.core.mail import send_mail, EmailMessage
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 import root.templates as templates
 import datetime
 from booking.timezones import common_timezones_array_of_dicts, convert_time_from_local_to_utc, convert_time_from_utc_to_local
@@ -35,8 +35,8 @@ def index(request):
         guid = booking.calendar.generate_guid()
         if start_date == "" or expiry_date == "" or duration == "" or name == "":
             return templates.message(request, _("Error: Please fill out all fields"))
-
-        ticket = Ticket(name=name, first_available_date=start_date, duration=duration, expiry=expiry_date, generate_jitsi_link=generate_jitsi_link, assigned_user=request.user, guid=guid)
+        recurring = request.POST.get("recurring", "") == "on"
+        ticket = Ticket(name=name, first_available_date=start_date, duration=duration, expiry=expiry_date, generate_jitsi_link=generate_jitsi_link, assigned_user=request.user, guid=guid, recurring=recurring)
         ticket.save()
         share_url = settings.BASE_URL + reverse("ticket_customer_view", args=[ticket.guid])
         return render(request, "booking/ticket_created.html", {"ticket": ticket, "share_url": share_url})
@@ -113,6 +113,94 @@ def delete_calendar(request, calendar_id):
     calendar.delete()
     return render(request, "root/message.html", {"message": _("Calendar deleted"), "url": reverse("calendars")})
 
+def recurring_ticket(request, guid):
+    _load_timezone_for_request(request)
+    # Look if ticket exists
+    try:
+        ticket = Ticket.objects.get(guid=guid)
+    except Ticket.DoesNotExist:
+        return templates.message(request, _("The ticket has expired."), "index")
+    if not ticket.recurring:
+        return templates.message(request, _("This is not a recurring ticket."), "ticket_customer_view", [guid])
+    
+    # Get all tickets which belong to this recurring ticket
+    tickets = Ticket.objects.filter(parent_ticket=ticket)
+    tickets = list(tickets)
+    # Sort tickets by creation. The newest ticket should be on top.
+    # (The id is automatically incremented by the database, so we can use this as a timestamp for the creation date.)
+    tickets.sort(key=lambda x: x.id, reverse=True)
+    ticket_dicts = []
+    for ticket in tickets:
+        ticket_dict = {
+            "name": ticket.name,
+            "duration": ticket.duration,
+            "current_date": ticket.current_date,
+            "current_date_ticket_user": convert_time_from_utc_to_local(ticket.current_date, ticket.assigned_user.profile.timezone),
+            "guid": ticket.guid,
+        }
+        ticket_dicts.append(ticket_dict)
+    overview = templates.process_overview_dict({
+        "heading": _("Appointments with") + " " + ticket.assigned_user.first_name + " " + ticket.assigned_user.last_name,
+        "element_name": _("Ticket"),
+        "elements": ticket_dicts,
+        "element_url_key": "guid",
+        "t_headings": [_("Name"), _("Duration"), _("Booked Date")],
+        "t_keys": ["name", "duration", "current_date_ticket_user"],
+        "edit_url_name": "customer_change_date", 
+        "delete_url_name": "delete_ticket",
+        "hint": '<a href="{}" role="button">{}</a>'.format(reverse("create_ticket_from_recurring", args=[guid]), _("Create a new appointment")),
+    })
+    print(overview["hint"])
+    return render(request, 'root/overview_x.html', {"overview": overview, "timezones": common_timezones_array_of_dicts})
+   
+   
+def create_ticket_from_recurring(request, guid):
+    _load_timezone_for_request(request)
+    # Look if ticket exists
+    try:
+        parent_ticket = Ticket.objects.get(guid=guid)
+    except Ticket.DoesNotExist:
+        return templates.message(request, _("The ticket has expired."), "index")
+    if not parent_ticket.recurring:
+        return templates.message(request, _("This is not a recurring ticket."), "ticket_customer_view", [guid])
+    form = forms.TicketCustomerForm()
+    if request.method == "POST":
+        form = forms.TicketCustomerForm(request.POST)
+        guid = booking.calendar.generate_guid()
+
+        if form.is_valid():
+            # Check if duration is bigger than the duration of the parent ticket
+            if int(form.cleaned_data["duration"]) > parent_ticket.duration.seconds // 60:
+                return templates.message(request, _("The duration is too long. Please select a shorter duration."), "recurring_ticket", [guid])
+            new_ticket = Ticket(name=parent_ticket.name + ": " + form.cleaned_data["description"],
+                                first_available_date=datetime.date.today(),
+                                duration=datetime.timedelta(minutes=int(form.cleaned_data["duration"])),
+                                expiry=(datetime.date.today() + datetime.timedelta(days=14)),
+                                generate_jitsi_link=form.cleaned_data["generate_jitsi_link"] == "on",
+                                assigned_user=parent_ticket.assigned_user, 
+                                email_of_customer=parent_ticket.email_of_customer,
+                                guid=guid,
+                                parent_ticket=parent_ticket,
+                                recurring=False)
+            new_ticket.save()
+            share_url = settings.BASE_URL + reverse("ticket_customer_view", args=[new_ticket.guid])
+            return HttpResponseRedirect(share_url)
+    # Remove all the durations of the form select which are higher than the duration in the parent ticket
+    choices_for_customer = []
+    for choice in form.fields["duration"].choices:
+        print(choice)
+        print(choice[0], parent_ticket.duration.seconds // 60)
+        if choice[0] <= parent_ticket.duration.seconds // 60:
+            choices_for_customer.append(choice)
+            print("Append")
+    form.fields["duration"].choices = choices_for_customer
+    # Set the initial choice to the highest possible duration
+    form.fields["duration"].initial = parent_ticket.duration.seconds // 60
+
+    form.fields["description"].initial = _("Ticket from") + " " + datetime.datetime.now().strftime("%d.%m.%Y")
+
+    return render(request, 'root/create_x.html', {"element_name": _("Appointment"), "form": form, "back": reverse("recurring_ticket", args=[guid])})
+
 
 def ticket_customer_view(request, guid):
     _load_timezone_for_request(request)
@@ -121,6 +209,11 @@ def ticket_customer_view(request, guid):
         ticket = Ticket.objects.get(guid=guid)
     except Ticket.DoesNotExist:
         return templates.message(request, _("The ticket has expired."), "index")
+    
+    # Add handling for recurring tickets
+    if ticket.recurring:
+        return HttpResponseRedirect(reverse("recurring_ticket", args=[guid]))
+
     if ticket.current_date:
         ticket_datetime = ticket.current_date
         ticket_datetime_customer = convert_time_from_utc_to_local(ticket_datetime, request.session["django_timezone"])
@@ -158,6 +251,7 @@ def tickets(request):
             "current_date": ticket.current_date,
             "current_date_ticket_user": convert_time_from_utc_to_local(ticket.current_date, ticket.assigned_user.profile.timezone),
             "guid": ticket.guid,
+            "recurring": ticket.recurring,
         }
         ticket_dicts.append(ticket_dict)
     overview = templates.process_overview_dict({
@@ -165,8 +259,8 @@ def tickets(request):
         "element_name": _("Ticket"),
         "elements": ticket_dicts,
         "element_url_key": "guid",
-        "t_headings": [_("Name"), _("Duration"), _("Booked Date")],
-        "t_keys": ["name", "duration", "current_date_ticket_user"],
+        "t_headings": [_("Name"), _("Duration"), _("Booked Date"), _("Recurring")],
+        "t_keys": ["name", "duration", "current_date_ticket_user", "recurring"],
         "add_url_name": "index",
         "edit_url_name": "edit_ticket", 
         "delete_url_name": "delete_ticket",
@@ -175,11 +269,25 @@ def tickets(request):
     return render(request, 'root/overview_x.html', {"overview": overview, "timezones": common_timezones_array_of_dicts})
 
 
-@login_required()
 def delete_ticket(request, guid):
-    ticket = Ticket.objects.get(guid=guid)
+    try:
+        ticket = Ticket.objects.get(guid=guid)
+    except Ticket.DoesNotExist:
+        return templates.message(request, _("The ticket has expired."), "index")
+    # If this is not made by a recurring ticket, we need to check if the user is logged in
+    if not ticket.parent_ticket:
+        # Check if the user is logged in
+        if not request.user.is_authenticated:
+            return templates.message(request, _("You need to be logged in to delete a ticket."), "index")
+        # Remove the calndar event if it exists
+        booking.calendar.remove_booking(guid)
+        ticket.delete()
+        return redirect("tickets")
+    # If this is a recurring ticket, we delete the ticket but redirect to the recurring ticket view
+    parent_guid = ticket.parent_ticket.guid
+    booking.calendar.remove_booking(guid)
     ticket.delete()
-    return redirect("tickets")
+    return redirect("recurring_ticket", guid=parent_guid)
 
 
 @login_required()
@@ -277,6 +385,8 @@ def select_slot(request, guid, date, start_time):
         ticket.current_date = datetime.datetime.combine(date, start_time)
         ticket.email_of_customer = request.POST.get("email", "")
         ticket.save()
+        if ticket.email_of_customer and ticket.parent_ticket:
+            ticket.parent_ticket.email_of_customer = ticket.email_of_customer
         booking.calendar.book_ticket(guid)
         assigned_user = ticket.assigned_user
         current_datetime = ticket.current_date
@@ -293,7 +403,11 @@ def select_slot(request, guid, date, start_time):
             fail_silently=True,
         )
         ticket_description = booking.booking.get_ticket_description_for_customer(ticket)
-        attachment_ics = booking.calendar.get_ical_string_for_ticket(ticket.guid)
+        # Add the description of the customer which he could set in tickets which are created from a recurring ticket to the ical event
+        if ticket.parent_ticket:
+            attachment_ics = booking.calendar.get_ical_string_for_ticket(ticket.guid, ": " + ticket.name)
+        else:
+            attachment_ics = booking.calendar.get_ical_string_for_ticket(ticket.guid) 
         if ticket.email_of_customer:
             email = EmailMessage(
                 f'{ticket_description} ' + _("booked. Date: ") + current_datetime_customer.strftime("%d.%m.%Y %H:%M") + ' ' + _("APPENDIX_AFTER_TIME"),
@@ -311,6 +425,9 @@ def select_slot(request, guid, date, start_time):
     email_of_customer = ""
     if ticket.email_of_customer:
         email_of_customer = ticket.email_of_customer
+    # Check if the parent ticket has an email address and use this as default
+    if ticket.parent_ticket and ticket.parent_ticket.email_of_customer:
+        email_of_customer = ticket.parent_ticket.email_of_customer
     return render(request, "booking/booking_confirmation.html", {"ticket": ticket, "date": date, "start_time": start_time, "start_time_display": start_time_display, "date_display": date_display, "duration_display": duration_display, "email_of_customer": email_of_customer})
 
 
@@ -345,6 +462,8 @@ def customer_change_date(request, guid):
     _load_timezone_for_request(request)
     ticket = Ticket.objects.get(guid=guid)
     last_datetime = ticket.current_date
+    if not last_datetime:
+        return HttpResponseRedirect(reverse("ticket_customer_view", args=[guid]))
     last_datetime_ticket_user = convert_time_from_utc_to_local(last_datetime, ticket.assigned_user.profile.timezone)
     last_datetime_customer = convert_time_from_utc_to_local(last_datetime, request.session["django_timezone"])
     booking.calendar.remove_booking(guid)

@@ -5,7 +5,10 @@ def process_overview_dict(overview : dict) -> dict:
     """
     Process the overview dictionary and returns the processed dictionary
     """
-    overview["add_url"] = reverse(overview["add_url_name"])
+    if overview.get("add_url_name", None) is not None:
+        overview["add_url"] = reverse(overview["add_url_name"])
+    else:
+        overview["add_url"] = None
     if overview["element_url_key"] is None:
         overview["element_url_key"] = overview["t_keys"][0]
     overview["table_content"] = []
