@@ -25,7 +25,12 @@ def delete_old_tickets():
     tickets = Ticket.objects.filter(expiry__lt=today)
     tickets_to_delete = []
     for ticket in tickets:
-        tickets_to_delete.append(ticket)
+        # Check if the booked time has also already passed
+        if ticket.current_date:
+            if ticket.current_date.date() < today:
+                tickets_to_delete.append(ticket)
+        else:
+            tickets_to_delete.append(ticket)
     Ticket.objects.filter(id__in=[ticket.id for ticket in tickets_to_delete]).delete()
 
 
