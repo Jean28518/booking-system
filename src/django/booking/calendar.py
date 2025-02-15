@@ -120,7 +120,7 @@ def get_available_slots_for_ticket(ticket, timezone: str, request):
         for cluster in available_clusters:
             # If the ticket is longer than 15 minutes then we have to remove the length of the ticket in the end.
             # Because otherwise we would have a ticket which exeecds the working hours
-            if duration_in_quarters < 1:
+            if duration_in_quarters > 1:
                 cluster = cluster[:-duration_in_quarters + 1]
             for slot in cluster:
                 day["slots"].append(slot)
