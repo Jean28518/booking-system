@@ -1,6 +1,8 @@
 from datetime import date
 
+
 from .models import BookingSettings, Ticket
+from django.utils.translation import gettext as _
 
 
 def get_booking_settings_for_user(user):
@@ -12,9 +14,9 @@ def get_booking_settings_for_user(user):
 
 def get_ticket_description_for_customer(ticket):
     assigned_user = ticket.assigned_user
-    user_name = "Termin bei " + assigned_user.first_name + " " + assigned_user.last_name
-    if user_name.strip() == "Termin bei":
-        user_name = "Termin"
+    user_name = _("Appointment with") + " " + assigned_user.first_name + " " + assigned_user.last_name
+    if user_name.strip() == _("Appointment with") + " ":
+        user_name =  _("Appointment")
     return user_name
 
 

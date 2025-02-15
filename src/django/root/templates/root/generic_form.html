@@ -1,4 +1,5 @@
 {% extends "root/base.html" %}
+{% load i18n %}
 {% block content %}
 
 {% if title %}
@@ -19,7 +20,7 @@
         <div class="grid">
             {% if back %}
                 <div>
-                    <a href="{{back}}"role="button" class="secondary" style="display: block;">Zurück</a>
+                    <a href="{{back}}"role="button" class="secondary" style="display: block;">{%translate "Back" %}</a>
                 </div>
             {% endif %}
             <input type="submit" value="{{submit}}">
@@ -30,7 +31,7 @@
     <div class="grid">
         {% if back %}
             <div>
-                <a href="{{back}}"role="button" class="secondary" style="display: block;">Zurück</a>
+                <a href="{{back}}"role="button" class="secondary" style="display: block;">{%translate "Back" %}</a>
             </div>
         {% endif %}
         <input type="submit" value="{{submit}}" {% if danger %}class="danger"{% endif %}>

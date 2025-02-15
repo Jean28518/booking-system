@@ -1,4 +1,5 @@
 {% extends "root/base.html" %}
+{% load i18n %}
 {% block content %}
 
 <h2>{{ overview.heading }}</h2>
@@ -6,7 +7,7 @@
 
 
 {% if overview.add_url %}
-<a href="{{ overview.add_url }}" role="button" class="primary">{{ overview.element_name }} hinzufügen</a>
+<a href="{{ overview.add_url }}" role="button" class="primary">{% translate "Create" %}</a>
 {% endif %}
 
 {% if overview.message != "" %}
@@ -23,10 +24,10 @@
         <th scope="col"><center>{{t_heading}} </center></th>
         {% endfor %}
         {% if overview.edit_url_name %}
-            <th scope="col"><center>Bearbeiten</center></th>
+            <th scope="col"><center>{% translate "Edit" %}</center></th>
         {% endif %}
         {% if overview.delete_url_name %}
-            <th scope="col"><center>Löschen</center></th>
+            <th scope="col"><center>{% translate "Delete" %}</center></th>
         {% endif %}
       </tr>
     </thead>
@@ -67,9 +68,9 @@
                 data-target="modal-{{t_row.delete_url}}"
                 onClick="toggleModal(event)">
                 </a>
-                <h3>{{t_row.first_field}} wirklich löschen?</h3>
+                <h3>{% translate "Confirmation" %}</h3>
                 <p>
-                Dieser Vorgang ist nicht mehr umkehrbar!
+                {% translate "This action cannot be undone!" %}
                 </p>
                 <footer>
                 <a href="#cancel"
@@ -77,9 +78,9 @@
                     class="secondary"
                     data-target="modal-{{t_row.delete_url}}"
                     onClick="toggleModal(event)">
-                    Abbrechen
+                    {% translate "Cancel" %}
                 </a>
-                <a href="{{t_row.delete_url}}"role="button" class="contrast">LÖSCHEN</a>
+                <a href="{{t_row.delete_url}}" role="button" class="contrast">{% translate "DELETE" %}</a>
                 </footer>
             </article>
         </dialog>

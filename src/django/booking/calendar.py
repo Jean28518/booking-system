@@ -9,6 +9,7 @@ import booking.booking as booking
 import locale
 import pytz
 from booking.timezones import common_timezones, convert_time_from_local_to_utc, convert_time_from_utc_to_local
+from django.utils.translation import gettext as _
 
 def time_to_quarter(time):
     return time.hour * 4 + time.minute // 15
@@ -61,7 +62,7 @@ def get_free_slots(events, start_time: datetime.datetime, end_time: datetime.dat
     return days
 
 
-def get_available_slots_for_ticket(ticket, timezone: str):
+def get_available_slots_for_ticket(ticket, timezone: str, request):
     """Returns a list of weeks, which is containing a list of days, which is containing available slots for the ticket. All returned slots are in the asked timezone."""
     # Get all calendars of the user
     calendars = Calendar.objects.filter(assigned_user=ticket.assigned_user)
@@ -137,17 +138,25 @@ def get_available_slots_for_ticket(ticket, timezone: str):
             new_slots.append({"start": quarter_to_time(slot), "end": quarter_to_time(slot + duration_in_quarters)})
         day["slots"] = new_slots
 
-        # Generate a good looking title for the day in german
-        locale.setlocale(locale.LC_ALL, 'de_DE.UTF-8')
+        # Get the locale of the request
+        language = request.LANGUAGE_CODE
+        # locale.setlocale(locale.LC_ALL, "de_DE.UTF-8")
+        match language:
+            case "en":
+                locale.setlocale(locale.LC_ALL, "en_GB.UTF-8") 
+            case "de":
+                locale.setlocale(locale.LC_ALL, "de_DE.UTF-8")
+      
+
         day["title"] = day["date"].strftime("%A, %d.%m.%Y")
         # If day is today, add "Heute" to the title
         if day["date"] == datetime.datetime.now(timezone).date():
-            day["title"] = "Heute, " + day["title"]
+            day["title"] = _("Today") + ", " + day["title"]
             # Remove all slots which are in the past
             day["slots"] = [slot for slot in day["slots"] if time_to_quarter(slot["start"]) > time_to_quarter((datetime.datetime.now() + datetime.timedelta(minutes=15)).time())]
         # If day is tomorrow, add "Morgen" to the title
         if day["date"] == datetime.datetime.now(timezone).date() + datetime.timedelta(days=1):
-            day["title"] = "Morgen, " + day["title"]
+            day["title"] =  _("Tomorrow") + ", " + day["title"]
 
         ## Remove all the slots which are on a day the user excluded in the settings
         slots_to_remove = []
@@ -292,22 +301,3 @@ def get_ical_string_for_ticket(ticket_guid):
     summary = booking.get_ticket_description_for_customer(ticket)
     jitsi_link = booking.get_jitsi_link_for_ticket(ticket)
     return caldav.get_ical_string_for_event(start, end, summary, jitsi_link)
-
-
-# DEPRECATED
-# Also doesn't work reliable in practice
-# def is_slot_available(ticket_guid, date, start_time):
-#     ticket = Ticket.objects.get(guid=ticket_guid)
-#     weeks = get_available_slots_for_ticket(ticket)
-#     for week in weeks:
-#         for day in week:
-#             if day["date"] == None:
-#                 continue
-#             if day["date"].strftime("%Y-%m-%d").strip() == date.strftime("%Y-%m-%d").strip():
-#                 for slot in day["slots"]:
-#                     if slot["start"].strftime("%H:%M").strip() == start_time.strftime("%H:%M").strip():
-#                         return True
-#             return False
-        
-#     return False
-    

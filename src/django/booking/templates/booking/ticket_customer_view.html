@@ -1,5 +1,5 @@
 {% extends "root/base.html" %}
-
+{% load i18n %}
 {% block content %}
 
 <center>
@@ -8,15 +8,15 @@
 {% include "booking/profile.html" %}
 </div>
 
-<h4 style="margin: 0.5rem;">Vereinbarter Termin: {{ date_display }}</h4>
-<strong>Uhrzeit: </strong>{{ start_time_display }} Uhr<br>
-<strong>Dauer: </strong> {{ duration_display }} Minuten<br>
-{% if jitsi_link != "" %}<strong>Link zum Meeting (Jitsi): </strong><br><a href="{{ jitsi_link }}">{{ jitsi_link }}</a><br>{% endif %}
+<h4 style="margin: 0.5rem;">{%translate "Agreed appointment" %}: {{ date_display }}</h4>
+<strong>{%translate "Time" %}: </strong>{{ start_time_display }} {%translate "APPENDIX_AFTER_TIME" %}<br>
+<strong>{%translate "Duration" %}: </strong> {{ duration_display }} {%translate "minutes" %}<br>
+{% if jitsi_link != "" %}<strong>{%translate "Link to meeting" %} (Jitsi): </strong><br><a href="{{ jitsi_link }}">{{ jitsi_link }}</a><br>{% endif %}
 
 <br>
 
-<a href="{% url "customer_change_date" ticket.guid %}" class="secondary" style="width: 12rem;">Termin ändern</a><br>
-<a href="{% url "customer_cancel_ticket" ticket.guid %}" class="secondary" style="width: 12rem;">Termin absagen</a><br>
+<a href="{% url "customer_change_date" ticket.guid %}" class="secondary" style="width: 12rem;">{%translate "Change appointment" %}</a><br>
+<a href="{% url "customer_cancel_ticket" ticket.guid %}" class="secondary" style="width: 12rem;">{%translate "Cancle appointment" %}</a><br>
 
 </center>
 

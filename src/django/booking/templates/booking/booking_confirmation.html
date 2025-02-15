@@ -1,26 +1,27 @@
 {% extends "root/base.html" %}
+{% load i18n %}
 {% block content %}
 
 <br><br>
 
 <center>
-<h2>Termin bestätigen</h2>
+<h2>{%translate "Confirm appointment" %}</h2>
 
-<strong>Termin:</strong> {{ date_display }} um {{ start_time_display }} Uhr<br>
-<strong>Dauer:</strong> {{ duration_display }} Minuten<br>
+<strong>{%translate "Appointment" %}:</strong> {{ date_display }} {%translate "at" %} {{ start_time_display }} {%translate "APPENDIX_AFTER_TIME" %}<br>
+<strong>{%translate "Duration" %}:</strong> {{ duration_display }} {%translate "minutes" %}<br>
 
 <form style="padding: 2rem;" method="post">
-    <label style="max-width: 25rem;">Termin-Bestätigung für den eigenen Kalender:
-        <input type="email" name="email" placeholder="E-Mail (optional)" value={{email_of_customer}}><br>
+    <label style="max-width: 25rem;">{%translate "Appointment confirmation for the own calendar" %}:
+        <input type="email" name="email" placeholder="{%translate "E-Mail (optional)" %}" value={{email_of_customer}}><br>
     </label>
     <input type="hidden" name="date" value="{{ date }}">
     <input type="hidden" name="start_time" value="{{ start_time }}">
     <input type="hidden" name="guid" value="{{ ticket.guid }}">
     <div class="">
         <div style="display: inline;">
-            <a href="{% url "ticket_customer_view" ticket.guid %}"role="button" class="secondary" style="width: 8rem;">Zurück</a>
+            <a href="{% url "ticket_customer_view" ticket.guid %}"role="button" class="secondary" style="width: 8rem;">{%translate "Back" %}</a>
         </div>
-        <input style="display: inline; width: 15rem;" type="submit" value="Termin jetzt bestätigen">
+        <input style="display: inline; width: 15rem;" type="submit" value="{%translate "Confirm appointment now" %}">
     </div>
 </form>
 </center>

@@ -14,6 +14,7 @@ import booking.forms as forms
 import booking.calendar
 import booking.caldav
 import booking.booking
+from django.utils.translation import gettext as _
 
 from django.contrib.auth.models import User
 
@@ -33,7 +34,7 @@ def index(request):
         # Generate guid
         guid = booking.calendar.generate_guid()
         if start_date == "" or expiry_date == "" or duration == "" or name == "":
-            return templates.message(request, "Fehler: Bitte alle Felder ausfüllen")
+            return templates.message(request, _("Error: Please fill out all fields"))
 
         ticket = Ticket(name=name, first_available_date=start_date, duration=duration, expiry=expiry_date, generate_jitsi_link=generate_jitsi_link, assigned_user=request.user, guid=guid)
         ticket.save()
@@ -41,7 +42,7 @@ def index(request):
         return render(request, "booking/ticket_created.html", {"ticket": ticket, "share_url": share_url})
 
     booking.booking.delete_old_tickets()
-    default_name = "Ticket von " + datetime.datetime.now().strftime("%d.%m.%Y %H:%M Uhr")
+    default_name = _("Ticket from") + " " + datetime.datetime.now().strftime("%d.%m.%Y %H:%M") + " " + _("APPENDIX_AFTER_TIME")
     start_date = datetime.date.today().strftime("%Y-%m-%d")
     expiry_date = (datetime.date.today() + datetime.timedelta(days=14)).strftime("%Y-%m-%d")
     return render(request, 'booking/index.html', {"start_date": start_date, "expiry_date": expiry_date, "default_name": default_name})
@@ -52,11 +53,11 @@ def calendars(request):
     calendars = list(Calendar.objects.filter(assigned_user=request.user))
 
     overview = templates.process_overview_dict({
-        "heading": "Kalender",
-        "element_name": "Kalender",
+        "heading": _("Calendars"),
+        "element_name": _("Calendar"),
         "elements": calendars,
         "element_url_key": "id",
-        "t_headings": ["Name", "Hauptkalender"],
+        "t_headings": [_("Name"), _("Main Calendar")],
         "t_keys": ["name", "main_calendar"],
         "add_url_name": "create_calendar",
         "edit_url_name": "edit_calendar",
@@ -65,8 +66,7 @@ def calendars(request):
     # If no calendar is set as main calendar, display message
     if not booking.calendar.get_main_calendar_for_user(request.user):
         print("FALSE!")
-        overview["message"] = "Es wurde noch kein Hauptkalender festgelegt. Dieser ist notwendig, um Buchungen abzuspeichern."
-
+        overview["message"] = _("No main calendar has been set. This is necessary to save bookings.")
 
     return render(request, 'root/overview_x.html', {"overview": overview})
 
@@ -82,10 +82,10 @@ def create_calendar(request):
             calendar.save()
             if calendar.main_calendar:
                 booking.calendar.set_main_calendar_for_user(request.user, calendar)
-            return render(request, "root/message.html", {"message": "Kalender erfolgreich erstellt", "url": reverse("calendars")})
+            return render(request, "root/message.html", {"message": _("Calendar successfully created"), "url": reverse("calendars")})
         else:
-            message = "Fehler beim Erstellen des Kalenders"
-    return render(request, 'root/create_x.html', {"element_name": "Kalender", "form": form, "back": reverse("calendars"), "message": message})
+            message = _("Error creating calendar")
+    return render(request, 'root/create_x.html', {"element_name": _("Calendar"), "form": form, "back": reverse("calendars"), "message": message})
 
 @login_required()
 def edit_calendar(request, calendar_id):
@@ -101,9 +101,9 @@ def edit_calendar(request, calendar_id):
             print(calendar.main_calendar)
             if calendar.main_calendar:
                 booking.calendar.set_main_calendar_for_user(request.user, calendar)
-            return render(request, "root/message.html", {"message": "Änderungen abgespeichert", "url": reverse("calendars")})
+            return render(request, "root/message.html", {"message": _("Changes saved"), "url": reverse("calendars")})
         else:
-            message = "Fehler beim Bearbeiten des Kalenders"
+            message = _("Error editing calendar")
     return render(request, 'root/edit_x.html', {"name": calendar.name, "form": form, "back": reverse("calendars"), "message": message})
 
 
@@ -111,7 +111,7 @@ def edit_calendar(request, calendar_id):
 def delete_calendar(request, calendar_id):
     calendar = Calendar.objects.get(id=calendar_id)
     calendar.delete()
-    return render(request, "root/message.html", {"message": "Kalender gelöscht", "url": reverse("calendars")})
+    return render(request, "root/message.html", {"message": _("Calendar deleted"), "url": reverse("calendars")})
 
 
 def ticket_customer_view(request, guid):
@@ -120,7 +120,7 @@ def ticket_customer_view(request, guid):
     try:
         ticket = Ticket.objects.get(guid=guid)
     except Ticket.DoesNotExist:
-        return templates.message(request, "Das Ticket ist leider abgelaufen.", "index")
+        return templates.message(request, _("The ticket has expired."), "index")
     if ticket.current_date:
         ticket_datetime = ticket.current_date
         ticket_datetime_customer = convert_time_from_utc_to_local(ticket_datetime, request.session["django_timezone"])
@@ -129,7 +129,7 @@ def ticket_customer_view(request, guid):
         duration_display = ticket.duration.seconds // 60
         jitsi_link = booking.booking.get_jitsi_link_for_ticket(ticket)
         return render(request, "booking/ticket_customer_view.html", {"ticket": ticket, "date_display": date_display, "start_time_display": start_time_display, "duration_display": duration_display, "jitsi_link": jitsi_link, "timezones": common_timezones_array_of_dicts})
-    weeks = booking.calendar.get_available_slots_for_ticket(ticket, request.session["django_timezone"])
+    weeks = booking.calendar.get_available_slots_for_ticket(ticket, request.session["django_timezone"], request)
     slots = []
     for week in weeks:
         for day in week:
@@ -161,16 +161,16 @@ def tickets(request):
         }
         ticket_dicts.append(ticket_dict)
     overview = templates.process_overview_dict({
-        "heading": "Tickets",
-        "element_name": "Ticket",
+        "heading": _("Tickets"),
+        "element_name": _("Ticket"),
         "elements": ticket_dicts,
         "element_url_key": "guid",
-        "t_headings": ["Name", "Dauer", "Gebuchtes Datum"],
+        "t_headings": [_("Name"), _("Duration"), _("Booked Date")],
         "t_keys": ["name", "duration", "current_date_ticket_user"],
         "add_url_name": "index",
         "edit_url_name": "edit_ticket", 
         "delete_url_name": "delete_ticket",
-        "hint": "Tickets können auch über den Link geteilt werden",
+        "hint": _("Tickets can also be shared via the link"),
     })
     return render(request, 'root/overview_x.html', {"overview": overview, "timezones": common_timezones_array_of_dicts})
 
@@ -201,9 +201,9 @@ def edit_ticket(request, guid):
                 ticket.duration = datetime.timedelta(hours=minutes, minutes=seconds)
                 
             ticket.save()
-            return render(request, "root/message.html", {"message": "Änderungen abgespeichert", "url": reverse("tickets")})
+            return render(request, "root/message.html", {"message": _("Changes saved"), "url": reverse("tickets")})
         else:
-            message = "Fehler beim Bearbeiten des Tickets"
+            message = _("Error editing ticket")
     form.fields['ticket_customer_link'].initial = settings.BASE_URL + reverse("ticket_customer_view", args=[guid])
     form.fields['first_available_date'].initial = ticket.first_available_date.strftime("%Y-%m-%d")
     form.fields['expiry'].initial = ticket.expiry.strftime("%Y-%m-%d")
@@ -218,14 +218,22 @@ def booking_settings(request):
     if request.method == "POST":
         form = forms.BookingSettingsForm(request.POST, instance=settings)
         if form.is_valid():
-            settings = form.save(commit=False)
+            settings = form.save(commit(False))
             settings.assigned_user = request.user
             settings.save()
-            message = "Änderungen abgespeichert."
+            message = _("Changes saved.")
         else:
-            message = "Fehler beim Bearbeiten der Einstellungen."
+            message = _("Error editing settings.")
 
-    return render(request, 'root/generic_form.html', {"title": "Buchungseinstellungen", "form": form, "back": reverse("index"), "message": message, "submit": "Speichern", "display_buttons_at_top": True, "timezones": common_timezones_array_of_dicts})
+    return render(request, 'root/generic_form.html', {
+        "title": _("Booking Settings"),
+        "form": form,
+        "back": reverse("index"),
+        "message": message,
+        "submit": _("Save"),
+        "display_buttons_at_top": True,
+        "timezones": common_timezones_array_of_dicts
+    })
 
     
 def select_slot(request, guid, date, start_time):
@@ -248,15 +256,15 @@ def select_slot(request, guid, date, start_time):
     if request.method == "POST":
         # Check if the selected slot is still available (disabled because of some errors, we get)
         # if ticket.current_date == None and not booking.calendar.is_slot_available(guid, date, start_time):
-        #     return templates.message(request, "Ein Fehler ist aufgetreten. Bitte wählen Sie einen anderen Slot.", "ticket_customer_view", [guid])
+        #     return templates.message(request, _("An error occurred. Please select another slot."), "ticket_customer_view", [guid])
 
         # Check if the guid in session is the same as the guid in the url
         if request.session["ticket_guid"] != guid:
-            return templates.message(request, "Ein Fehler ist aufgetreten. Bitte wählen Sie einen anderen Slot.", "ticket_customer_view", [guid])
+            return templates.message(request, _("An error occurred. Please select another slot."), "ticket_customer_view", [guid])
         # and session[now] is younger than 5 minutes
         session_now = datetime.datetime.strptime(request.session["now"], "%Y-%m-%d %H:%M:%S")
         if (datetime.datetime.now() - session_now).seconds > 300:
-            return templates.message(request, "Ihre Sitzung ist abgelaufen. Bitte wählen Sie erneut einen Slot.", "ticket_customer_view", [guid])
+            return templates.message(request, _("Your session has expired. Please select a slot again."), "ticket_customer_view", [guid])
         # Also check if the date and start_time_customer can be found in the presented slots
         slot_found = False
         for slot in request.session.get("slots", []):
@@ -264,10 +272,8 @@ def select_slot(request, guid, date, start_time):
                 slot_found = True
                 break
         if not slot_found:
-            return templates.message(request, "Ein Fehler ist aufgetreten. Bitte wählen Sie einen anderen Slot!", "ticket_customer_view", [guid])
+            return templates.message(request, _("An error occurred. Please select another slot!"), "ticket_customer_view", [guid])
         
-       
-
         ticket.current_date = datetime.datetime.combine(date, start_time)
         ticket.email_of_customer = request.POST.get("email", "")
         ticket.save()
@@ -278,10 +284,10 @@ def select_slot(request, guid, date, start_time):
         current_datetime_customer = datetime.datetime.combine(date_customer, start_time_customer)
         meeting_link_description = ""
         if ticket.generate_jitsi_link:
-            meeting_link_description = f"\nLink zum Meeting (Jitsi): {booking.booking.get_jitsi_link_for_ticket(ticket)}"
+            meeting_link_description = f"\n" + _("Link to the meeting") + f" (Jitsi): {booking.booking.get_jitsi_link_for_ticket(ticket)}"
         send_mail(
-            'Termin "' + ticket.name + '" gebucht. Datum: ' + current_datetime_ticket_user.strftime("%d.%m.%Y %H:%M") + ' Uhr.',
-            f'Der Termin wurde am {current_datetime_ticket_user.strftime("%d.%m.%Y um %H:%M")} Uhr gebucht.' + meeting_link_description,
+            _("Appointment") + ' "' + ticket.name + '" ' + _("booked. Date: ") + current_datetime_ticket_user.strftime("%d.%m.%Y %H:%M") + ' ' + _("APPENDIX_AFTER_TIME"),
+            _("The appointment was booked on") + " " + current_datetime_ticket_user.strftime("%d.%m.%Y %H:%M") + ' ' + _("APPENDIX_AFTER_TIME") + meeting_link_description,
             settings.EMAIL_HOST_USER,
             [assigned_user.email],
             fail_silently=True,
@@ -290,12 +296,12 @@ def select_slot(request, guid, date, start_time):
         attachment_ics = booking.calendar.get_ical_string_for_ticket(ticket.guid)
         if ticket.email_of_customer:
             email = EmailMessage(
-                f'{ticket_description} gebucht. Datum: ' + current_datetime_customer.strftime("%d.%m.%Y %H:%M") + ' Uhr.',
-                f'{ticket_description} wurde am {current_datetime_customer.strftime("%d.%m.%Y um %H:%M")} Uhr mit einer Dauer von {duration_display} Minuten gebucht.{meeting_link_description}\n\nTipp: Sie können den Termin jeder Zeit über folgenden Link verwalten: {settings.BASE_URL + reverse("ticket_customer_view", args=[guid])}',
+                f'{ticket_description} ' + _("booked. Date: ") + current_datetime_customer.strftime("%d.%m.%Y %H:%M") + ' ' + _("APPENDIX_AFTER_TIME"),
+                f'{ticket_description} ' + _("booked. Date: ") + current_datetime_customer.strftime("%d.%m.%Y %H:%M") + ' ' + _("APPENDIX_AFTER_TIME") + f' ' + _("with a duration of") + f' {duration_display} ' + _("minutes") + f'.{meeting_link_description}\n\n' + _("Hint: You can manage the appointment at any time via the following link") + f': {settings.BASE_URL + reverse("ticket_customer_view", args=[guid])}',
                 settings.EMAIL_HOST_USER,
                 [ticket.email_of_customer],
             )
-            email.attach("termin.ics", attachment_ics, "text/calendar")
+            email.attach("event.ics", attachment_ics, "text/calendar")
             email.send()
         return redirect("ticket_customer_view", guid=guid)
 
@@ -317,8 +323,8 @@ def customer_cancel_ticket(request, guid):
     booking.calendar.remove_booking(guid)
     assigned_user = ticket.assigned_user
     send_mail(
-        'Termin "' + ticket.name + '" storniert.',
-        f'Der Termin am {current_datetime_ticket_user.strftime("%d.%m.%Y um %H:%M")} Uhr wurde storniert.',
+        _("Appointment") + ' "' + ticket.name + '" ' + _("canceled."),
+        _("The appointment on") + " " + current_datetime_ticket_user.strftime("%d.%m.%Y %H:%M") + ' ' + _("APPENDIX_AFTER_TIME") + ' ' + _("was canceled."),
         settings.EMAIL_HOST_USER,
         [assigned_user.email],
         fail_silently=True,
@@ -326,14 +332,13 @@ def customer_cancel_ticket(request, guid):
     ticket_description = booking.booking.get_ticket_description_for_customer(ticket)
     if ticket.email_of_customer:
         send_mail(
-            f'{ticket_description} storniert. Datum: {current_datetime_customer.strftime("%d.%m.%Y um %H:%M")} Uhr.',
-            f'{ticket_description} am {current_datetime_customer.strftime("%d.%m.%Y um %H:%M")} Uhr wurde storniert.\n\nTipp: Sie können den Termin jeder Zeit über folgenden Link neu buchen: {settings.BASE_URL + reverse("ticket_customer_view", args=[guid])}',
+            f'{ticket_description} ' + _("canceled. Date: ") + current_datetime_customer.strftime("%d.%m.%Y %H:%M") + ' ' + _("APPENDIX_AFTER_TIME"),
+            f'{ticket_description} ' + _("canceled. Date: ") + current_datetime_customer.strftime("%d.%m.%Y %H:%M") + ' ' + _("APPENDIX_AFTER_TIME") + f'.\n\n' + _("Hint: You can manage the appointment at any time via the following link") + f': {settings.BASE_URL + reverse("ticket_customer_view", args=[guid])}',
             settings.EMAIL_HOST_USER,
             [ticket.email_of_customer],
             fail_silently=True,
         )
-    return templates.message(request, "Termin erfolgreich storniert. Wenn Sie den Termin doch wahrnehmen wollen, werden Sie nun wieder zur Buchungs-Seite weitergeleitet.", "ticket_customer_view", [guid])
-
+    return templates.message(request, _("Appointment canceled. If you want to book the appointment again, you will be redirected to the booking page."), "ticket_customer_view", [guid])
 
 def customer_change_date(request, guid):
     """We remove the booking of the ticket and redirect to the booking page. The user can then select a new date."""
@@ -345,8 +350,8 @@ def customer_change_date(request, guid):
     booking.calendar.remove_booking(guid)
     assigned_user = ticket.assigned_user
     send_mail(
-        'Termin "' + ticket.name + '" wird verschoben...',
-        f'Der Termin wurde vom {last_datetime_ticket_user.strftime("%d.%m.%Y um %H:%M")} Uhr wurde abgesagt.\nDer Nutzer wird nun aufgefordert, einen neuen Termin zu buchen.',
+        _("Appointment") + ' "' + ticket.name + '" ' + _("is being moved."),
+        _("The appointment on") + " " + last_datetime_ticket_user.strftime("%d.%m.%Y %H:%M") + ' ' + _("APPENDIX_AFTER_TIME") + ' ' + _("was canceled. The user is now asked to book a new appointment."),
         settings.EMAIL_HOST_USER,
         [assigned_user.email],
         fail_silently=True,
@@ -368,7 +373,7 @@ def set_timezone(request):
         response.set_cookie("timezone", request.POST["timezone"], max_age=10*365*24*60*60)
         return response
     else:
-        return templates.message(request, "Fehler: Bitte wählen Sie eine Zeitzone aus.")
+        return templates.message(request, _("Error: Please select a timezone."))
     
 def _load_timezone_for_request(request):
     if request.user.is_authenticated:

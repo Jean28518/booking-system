@@ -1,29 +1,30 @@
 {% extends "root/base.html" %}
+{% load i18n %}
 {% block content %}
 
 <br>
 <br>
 <br>
 <center>
-<h2>Ticket erstellt!</h2>
+<h2>{%translate "Ticket created" %}</h2>
 
-<strong>Beschreibung:</strong> {{ticket.name}}<br>
-<strong>Frühester Termin:</strong> {{ticket.first_available_date}}<br>
-<strong>Dauer:</strong> {{ticket.duration}}
+<strong>{%translate "Description" %}:</strong> {{ticket.name}}<br>
+<strong>{%translate "Earliest date for appointment" %}</strong> {{ticket.first_available_date}}<br>
+<strong>{%translate "Duration" %}:</strong> {{ticket.duration}}
 
 <br>
 <br>
 
-    Schicke diesen Link an den Kunden, damit er einen Termin vereinbaren kann:
+    {%translate "Send this link to the customer so that an appointment can be made" %}:
     <div id="link" style="text-decoration: underline">{{share_url}}<br></div>
-    <small id="message">Auf den Link klicken, um Link in die Zwischenablage zu kopieren.</small>
+    <small id="message">{%translate "Click on the link to copy in the clipboard" %}</small>
 
 
 <br>
 <br>
 <br>
 
-<a href="{% url "index" %}" role="button">Zurück zur Startseite</a>
+<a href="{% url "index" %}" role="button">{%translate "Back to home" %}</a>
 
 </center>
 
@@ -39,7 +40,7 @@ document.getElementById('link').addEventListener('click', function(e) {
     input.select();
     document.execCommand('copy');
     document.body.removeChild(input);
-    document.getElementById('message').textContent = 'Link wurde in die Zwischenablage kopiert!';
+    document.getElementById('message').textContent = '{%translate "Link was copied into clipboard" %}!';
 });
 </script>
 

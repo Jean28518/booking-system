@@ -102,7 +102,7 @@
             <li><a href="#">Products</a></li> {% endcomment %}
             <!-- Timezone selection -->
             {% if timezones %}
-            Zeitzone:
+            {%translate "Timezone" %}:
             <select name = "timezone" id="timezone" onchange="setTimezone(this)" style="margin-left: 0.5rem; margin-right: 0.5rem; margin-top: 0.9rem;">
                 {% for timezone in timezones %}
                     <option value="{{ timezone.tz }}"{% if timezone.tz == TIME_ZONE %} selected{% endif %}>{{ timezone.city }}</option>
@@ -112,8 +112,8 @@
 
             {% if request.user.is_authenticated %}
             <ul>
-                <li><a href="{% url "tickets" %}" class="secondary">Tickets</a></li>
-                <li><a href="{% url "calendars" %}" class="secondary">Kalender</a></li>
+                <li><a href="{% url "tickets" %}" class="secondary">{%translate "Tickets" %}</a></li>
+                <li><a href="{% url "calendars" %}" class="secondary">{%translate "Calendar" %}</a></li>
                 <li>
                     <details class="dropdown">
                     <summary>
@@ -124,14 +124,14 @@
                         {% endif %}
                     </summary>
                     <ul dir="rtl">
-                        <li><a href="{% url "booking_settings" %}">Einstellungen</a></li>
-                        <li><a href="{% url "profile" %}">Profil</a></li>
-                        <li><a href="{% url "change_password" %}">Passwort ändern</a></li>
+                        <li><a href="{% url "booking_settings" %}">{%translate "Settings" %}</a></li>
+                        <li><a href="{% url "profile" %}">{%translate "Profile" %}</a></li>
+                        <li><a href="{% url "change_password" %}">{%translate "Change password" %}</a></li>
                         {% if request.user.is_superuser %}
-                            <li><a href="{% url "email_settings" %}">E-Mail-Einstellungen</a></li>
-                            <li><a href="{% url "admin_settings" %}">Administrator-Einstellungen</a></li>
+                            <li><a href="{% url "email_settings" %}">{%translate "E-Mail settings" %}</a></li>
+                            <li><a href="{% url "admin_settings" %}">{%translate "Administrator settings" %}</a></li>
                         {% endif %}
-                        <li><a href="{% url "logout" %}">Ausloggen</a></li>
+                        <li><a href="{% url "logout" %}">{%translate "Logout" %}</a></li>
                     </ul>
                     </details>
                 </li>

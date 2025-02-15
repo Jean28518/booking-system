@@ -5,6 +5,7 @@ from django.urls import reverse
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
+from django.utils.translation import gettext as _
 
 from accounts.models import Profile
 import os
@@ -29,16 +30,16 @@ def login_view(request):
                 login(request, user)
                 return redirect("index")
             else:
-                message = "Benutzername oder Passwort falsch"
+                message = _("Username or password incorrect")
 
     login_form = forms.LoginForm()
     register_url = reverse("register")
     return render(request, "root/generic_form.html", 
                   {"form": login_form,
-                    "title": "Login",
-                    "submit": "Einloggen",
+                    "title": _("Login"),
+                    "submit": _("Login"),
                     "message": message,
-                    "content_after": f"Noch keinen Account? <a href='{register_url}'>Registrieren</a>"
+                    "content_after": _("No account yet?") + f" <a href='{register_url}'>" + _("Register") + "</a>"
                    })
 
 def register_view(request):
@@ -46,7 +47,7 @@ def register_view(request):
     if user.is_authenticated:
         return redirect("index")
     if cfg.get_value("enable_registration", False) == False and User.objects.count() > 0:
-        return templates.message(request, "Registrierung deaktiviert. Bitte kontaktieren Sie den Administrator.", "index")
+        return templates.message(request, _("Registration disabled. Please contact the administrator."), "index")
     message = ""
     if request.method == "POST":
         register_form = forms.RegisterForm(request.POST)
@@ -57,7 +58,7 @@ def register_view(request):
             if password == password_repeat:
                 # Check if already user with this username exists
                 if User.objects.filter(username=username).exists():
-                    message = "Benutzername bereits vergeben"
+                    message = _("Username already taken")
                 else:
                     user = User.objects.create_user(username, password=password)
                     profile = Profile(user=user)
@@ -69,15 +70,15 @@ def register_view(request):
                     user.save()
                 return redirect("login")
             else:
-                message = "Passwörter stimmen nicht überein"
+                message = _("Passwords do not match")
     register_form = forms.RegisterForm()
     login_url = reverse("login")
     return render(request, "root/generic_form.html", 
                   {"form": register_form,
-                    "title": "Registrieren",
-                    "submit": "Registrieren",
+                    "title": _("Register"),
+                    "submit": _("Register"),
                     "message": message,
-                    "content_after": f"Schon einen Account? <a href='{login_url}'>Einloggen</a>"
+                    "content_after": _("Already have an account?") + f"<a href='{login_url}'>" + _("Login") + "</a>"
                    })
 
 def logout_view(request):
@@ -99,16 +100,16 @@ def change_password_view(request):
                     user.set_password(new_password)
                     user.save()
                     login(request, user)
-                    message = "Passwort erfolgreich geändert."
+                    message = _("Password changed successfully")
                 else:
-                    message = "Altes Passwort falsch"
+                    message = _("Old password incorrect")
             else:
-                message = "Neue Passwörter stimmen nicht überein"
+                message = _("New passwords do not match")
     change_password_form = forms.ChangePasswordForm()
     return render(request, "root/generic_form.html", 
                   {"form": change_password_form,
-                    "title": "Passwort ändern",
-                    "submit": "Ändern",
+                    "title": _("Change password"),
+                    "submit": _("Change"),
                     "back": reverse("index"),
                     "message": message
                    })
@@ -132,12 +133,12 @@ def profile_view(request):
                 user.profile.picture = ""
             user.profile.save()
             user.save()
-            message = "Profil erfolgreich geändert."
+            message = _("Profile updated")
     profile_form = forms.ProfileForm(initial={"username": user.username, "first_name": user.first_name, "last_name": user.last_name, "email": user.email, "phone": user.profile.phone, "picture": user.profile.picture})
     return render(request, "root/generic_form.html", 
                   {"form": profile_form,
-                    "title": "Profil",
-                    "submit": "Ändern",
+                    "title": _("Profile"),
+                    "submit": _("Save"),
                     "back": reverse("index"),
                     "message": message
                    })
@@ -165,8 +166,8 @@ def admin_settings(request):
         form = forms.AdminSettingsForm(request.POST)
         if form.is_valid():
             cfg.set_value("enable_registration", form.cleaned_data["enable_registration"])
-            message = "Änderungen abgespeichert."
+            message = _("Settings saved.")
         else:
-            message = "Fehler beim Bearbeiten der Einstellungen."
+            message = _("Invalid input")
     form.fields["enable_registration"].initial = cfg.get_value("enable_registration", False)
-    return render(request, 'root/generic_form.html', {"title": "Administrator-Einstellungen", "form": form, "back": reverse("index"), "submit": "Speichern", "message": message})
+    return render(request, 'root/generic_form.html', {"title": _("Administrator settings"), "form": form, "back": reverse("index"), "submit": _("Save"), "message": message})

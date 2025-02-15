@@ -1,27 +1,29 @@
 from django import forms
+from django.utils.translation import gettext as _
+
 
 class LoginForm(forms.Form):
-    username = forms.CharField(max_length=200, label="Benutzername")
-    password = forms.CharField(max_length=200, label="Passwort", widget=forms.PasswordInput)
+    username = forms.CharField(max_length=200, label=_("Username"))
+    password = forms.CharField(max_length=200, label=_("Password"), widget=forms.PasswordInput)
 
 class RegisterForm(forms.Form):
-    username = forms.CharField(max_length=200, label="Benutzername")
-    password = forms.CharField(max_length=200, label="Passwort", widget=forms.PasswordInput)
-    password_repeat = forms.CharField(max_length=200, label="Passwort wiederholen", widget=forms.PasswordInput)
+    username = forms.CharField(max_length=200, label=_("Username"))
+    password = forms.CharField(max_length=200, label=_("Password"), widget=forms.PasswordInput)
+    password_repeat = forms.CharField(max_length=200, label=_("Repeat password"), widget=forms.PasswordInput)
 
 class ChangePasswordForm(forms.Form):
-    old_password = forms.CharField(max_length=200, label="Altes Passwort", widget=forms.PasswordInput)
-    new_password = forms.CharField(max_length=200, label="Neues Passwort", widget=forms.PasswordInput)
-    new_password_repeat = forms.CharField(max_length=200, label="Neues Passwort wiederholen", widget=forms.PasswordInput)
+    old_password = forms.CharField(max_length=200, label=_("Old password"), widget=forms.PasswordInput)
+    new_password = forms.CharField(max_length=200, label=_("New password"), widget=forms.PasswordInput)
+    new_password_repeat = forms.CharField(max_length=200, label=_("Repeat new password"), widget=forms.PasswordInput)
 
 class ProfileForm(forms.Form):
-    username = forms.CharField(max_length=200, label="Benutzername", disabled=True, required=False)
-    first_name = forms.CharField(max_length=200, label="Vorname", required=False)
-    last_name = forms.CharField(max_length=200, label="Nachname", required=False)
-    email = forms.EmailField(max_length=200, label="E-Mail", required=False)
-    phone = forms.CharField(max_length=200, label="Telefonnummer", required=False)
-    picture = forms.ImageField(label="Profilbild", required=False)
+    username = forms.CharField(max_length=200, label=_("Username"), disabled=True, required=False)
+    first_name = forms.CharField(max_length=200, label=_("First name"), required=False)
+    last_name = forms.CharField(max_length=200, label=_("Last name"), required=False)
+    email = forms.EmailField(max_length=200, label=_("E-Mail"), required=False)
+    phone = forms.CharField(max_length=200, label=_("Phone"), required=False)
+    picture = forms.ImageField(label=_("Profile picture"), required=False)
 
 
 class AdminSettingsForm(forms.Form):
-    enable_registration = forms.BooleanField(label="Erlaube Registrierung", required=False)
+    enable_registration = forms.BooleanField(label=_("Enable registration"), required=False)

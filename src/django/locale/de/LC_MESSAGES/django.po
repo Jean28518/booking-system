@@ -1,0 +1,328 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-02-15 15:05+0000\n"
+"PO-Revision-Date: 2025-02-15 14:36+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.2.2\n"
+
+#: accounts/forms.py:6 accounts/forms.py:10 accounts/forms.py:20
+msgid "Username"
+msgstr ""
+
+#: accounts/forms.py:7 accounts/forms.py:11
+msgid "Password"
+msgstr ""
+
+#: accounts/forms.py:12
+msgid "Repeat password"
+msgstr ""
+
+#: accounts/forms.py:15
+msgid "Old password"
+msgstr ""
+
+#: accounts/forms.py:16
+msgid "New password"
+msgstr ""
+
+#: accounts/forms.py:17
+msgid "Repeat new password"
+msgstr ""
+
+#: accounts/forms.py:21
+msgid "First name"
+msgstr ""
+
+#: accounts/forms.py:22
+msgid "Last name"
+msgstr ""
+
+#: accounts/forms.py:23
+msgid "E-Mail"
+msgstr ""
+
+#: accounts/forms.py:24
+msgid "Phone"
+msgstr ""
+
+#: accounts/forms.py:25
+msgid "Profile picture"
+msgstr ""
+
+#: accounts/forms.py:29
+msgid "Enable registration"
+msgstr ""
+
+#: accounts/views.py:33
+msgid "Username or password incorrect"
+msgstr ""
+
+#: accounts/views.py:39 accounts/views.py:40 accounts/views.py:81
+msgid "Login"
+msgstr ""
+
+#: accounts/views.py:42
+msgid "No account yet?"
+msgstr ""
+
+#: accounts/views.py:42 accounts/views.py:78 accounts/views.py:79
+msgid "Register"
+msgstr ""
+
+#: accounts/views.py:50
+msgid "Registration disabled. Please contact the administrator."
+msgstr ""
+
+#: accounts/views.py:61
+msgid "Username already taken"
+msgstr ""
+
+#: accounts/views.py:73
+msgid "Passwords do not match"
+msgstr ""
+
+#: accounts/views.py:81
+msgid "Already have an account?"
+msgstr ""
+
+#: accounts/views.py:103
+msgid "Password changed successfully"
+msgstr ""
+
+#: accounts/views.py:105
+msgid "Old password incorrect"
+msgstr ""
+
+#: accounts/views.py:107
+msgid "New passwords do not match"
+msgstr ""
+
+#: accounts/views.py:111 root/templates/root/base.html:133
+msgid "Change password"
+msgstr ""
+
+#: accounts/views.py:112
+msgid "Change"
+msgstr ""
+
+#: accounts/views.py:136
+msgid "Profile updated"
+msgstr ""
+
+#: accounts/views.py:140 root/templates/root/base.html:132
+msgid "Profile"
+msgstr ""
+
+#: accounts/views.py:141 accounts/views.py:173
+msgid "Save"
+msgstr ""
+
+#: accounts/views.py:169
+msgid "Settings saved."
+msgstr ""
+
+#: accounts/views.py:171
+msgid "Invalid input"
+msgstr ""
+
+#: accounts/views.py:173 root/templates/root/base.html:136
+msgid "Administrator settings"
+msgstr ""
+
+#: booking/templates/booking/booking_confirmation.html:7
+msgid "Confirm appointment"
+msgstr ""
+
+#: booking/templates/booking/booking_confirmation.html:9
+msgid "Appointment"
+msgstr ""
+
+#: booking/templates/booking/booking_confirmation.html:9
+msgid "at"
+msgstr ""
+
+#: booking/templates/booking/booking_confirmation.html:9
+#: booking/templates/booking/select_slot.html:21
+#: booking/templates/booking/ticket_customer_view.html:12
+msgid "APPENDIX_AFTER_TIME"
+msgstr ""
+
+#: booking/templates/booking/booking_confirmation.html:10
+#: booking/templates/booking/ticket_created.html:13
+#: booking/templates/booking/ticket_customer_view.html:13
+msgid "Duration"
+msgstr ""
+
+#: booking/templates/booking/booking_confirmation.html:10
+#: booking/templates/booking/ticket_customer_view.html:13
+msgid "minutes"
+msgstr ""
+
+#: booking/templates/booking/booking_confirmation.html:13
+msgid "Appointment confirmation for the own calendar"
+msgstr ""
+
+#: booking/templates/booking/booking_confirmation.html:14
+msgid "E-Mail (optional)"
+msgstr ""
+
+#: booking/templates/booking/booking_confirmation.html:21
+#: root/templates/root/confirm.html:18 root/templates/root/generic_form.html:34
+msgid "Back"
+msgstr ""
+
+#: booking/templates/booking/booking_confirmation.html:23
+msgid "Confirm appointment now"
+msgstr ""
+
+#: booking/templates/booking/index.html:5
+#: booking/templates/booking/index.html:52
+msgid "Create ticket"
+msgstr ""
+
+#: booking/templates/booking/index.html:7
+msgid "Description (only you are able to see this)"
+msgstr ""
+
+#: booking/templates/booking/index.html:11
+#: booking/templates/booking/ticket_created.html:12
+msgid "Earliest date for appointment"
+msgstr ""
+
+#: booking/templates/booking/index.html:16
+msgid "Expiry date of ticket"
+msgstr ""
+
+#: booking/templates/booking/index.html:29
+msgid "Select other duration"
+msgstr ""
+
+#: booking/templates/booking/index.html:32
+#: booking/templates/booking/index.html:34
+#: booking/templates/booking/index.html:35
+#: booking/templates/booking/index.html:36
+#: booking/templates/booking/index.html:37
+#: booking/templates/booking/index.html:38
+#: booking/templates/booking/index.html:39
+#: booking/templates/booking/index.html:40
+#: booking/templates/booking/index.html:41
+#: booking/templates/booking/index.html:42
+#: booking/templates/booking/index.html:43
+#: booking/templates/booking/index.html:44
+#: booking/templates/booking/index.html:45
+msgid "hours"
+msgstr ""
+
+#: booking/templates/booking/index.html:49
+msgid "Generate jitsi link"
+msgstr ""
+
+#: booking/templates/booking/select_slot.html:7
+msgid "Select appointment"
+msgstr ""
+
+#: booking/templates/booking/select_slot.html:24
+msgid "No available appointments"
+msgstr ""
+
+#: booking/templates/booking/ticket_created.html:9
+msgid "Ticket created"
+msgstr ""
+
+#: booking/templates/booking/ticket_created.html:11
+msgid "Description"
+msgstr ""
+
+#: booking/templates/booking/ticket_created.html:18
+msgid "Send this link to the customer so that an appointment can be made"
+msgstr ""
+
+#: booking/templates/booking/ticket_created.html:20
+msgid "Click on the link to copy in the clipboard"
+msgstr ""
+
+#: booking/templates/booking/ticket_created.html:27
+msgid "Back to home"
+msgstr ""
+
+#: booking/templates/booking/ticket_created.html:43
+msgid "Link was copied into clipboard"
+msgstr ""
+
+#: booking/templates/booking/ticket_customer_view.html:11
+msgid "Agreed appointment"
+msgstr ""
+
+#: booking/templates/booking/ticket_customer_view.html:12
+msgid "Time"
+msgstr ""
+
+#: booking/templates/booking/ticket_customer_view.html:14
+msgid "Link to meeting"
+msgstr ""
+
+#: booking/templates/booking/ticket_customer_view.html:18
+msgid "Change appointment"
+msgstr ""
+
+#: booking/templates/booking/ticket_customer_view.html:19
+msgid "Cancle appointment"
+msgstr ""
+
+#: booking/views.py:385
+#, python-format
+msgid "The current time is %(time)s"
+msgstr "Die aktuelle Zeit ist %(time)s"
+
+#: root/settings.py:123
+msgid "language.en"
+msgstr "Englisch"
+
+#: root/settings.py:124
+msgid "language.de"
+msgstr "Deutsch"
+
+#: root/templates/root/base.html:109
+msgid "Timezone"
+msgstr ""
+
+#: root/templates/root/base.html:119
+msgid "Tickets"
+msgstr ""
+
+#: root/templates/root/base.html:120
+msgid "Calendar"
+msgstr ""
+
+#: root/templates/root/base.html:131
+msgid "Settings"
+msgstr ""
+
+#: root/templates/root/base.html:135
+msgid "E-Mail settings"
+msgstr ""
+
+#: root/templates/root/base.html:138
+msgid "Logout"
+msgstr ""
+
+#: root/templates/root/confirm.html:20
+msgid "Submit"
+msgstr ""
+
+#: root/templates/root/message.html:14
+msgid "Next"
+msgstr "Weiter"

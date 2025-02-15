@@ -1,10 +1,11 @@
 {% extends "root/base.html" %}
+{% load i18n %}
 {% block content %}
 
 {% if heading %}
 <h2>{{ heading }}</h2>
 {% else %}
-<h2> Erstelle {{ element_name }} </h2>
+<h2> {% translate "Create" %} {{ element_name }} </h2>
 {% endif %}
 
 {% if message != "" %}
@@ -15,18 +16,18 @@
     {% if display_buttons_at_top %}
         <div class="grid">
             <div>
-                <a href="{{back}}"role="button" class="secondary" style="display: block;">Zurück</a>
+                <a href="{{back}}"role="button" class="secondary" style="display: block;">{% translate "Back" %}</a>
             </div>
-            <input type="submit" value="Erstellen">
+            <input type="submit" value="{% translate "Create" %}">
         </div>
     {% endif %}
     {{ form }}
     <br>
     <div class="grid">
         <div>
-            <a href="{{back}}"role="button" class="secondary" style="display: block;">Zurück</a>
+            <a href="{{back}}"role="button" class="secondary" style="display: block;">{% translate "Back" %}</a>
         </div>
-        <input type="submit" value="Erstellen">
+        <input type="submit" value="{% translate "Create" %}">
     </div>
 </form>
     

@@ -23,6 +23,21 @@ booking.int.de {
 
 ```bash
 sudo apt-get install python3-venv python3-dev
+
+sudo -i
+# Install languages
+if ! grep -q "de_DE.UTF-8 UTF-8" /etc/locale.gen; then
+    echo "de_DE.UTF-8 UTF-8" >> /etc/locale.gen
+fi
+sed -i 's/# de_DE.UTF-8 UTF-8/de_DE.UTF-8 UTF-8/' /etc/locale.gen
+if ! grep -q "en_GB.UTF-8 UTF-8" /etc/locale.gen; then
+  echo "en_GB.UTF-8 UTF-8" >> /etc/locale.gen
+fi
+sed -i 's/# en_GB.UTF-8 UTF-8/en_GB.UTF-8 UTF-8/' /etc/locale.gen
+locale-gen
+exit
+
+
 cd src/django
 python3 -m venv .env
 ```

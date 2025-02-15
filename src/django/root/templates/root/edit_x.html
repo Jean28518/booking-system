@@ -1,7 +1,8 @@
 {% extends "root/base.html" %}
+{% load i18n %}
 {% block content %}
 
-<h2> Bearbeite {{ name }} </h2>
+<h2> {% translate "Edit" %} {{ name }} </h2>
 
 {% if description %} {{ description | safe }} <br> <br> {% endif %}
 
@@ -21,18 +22,18 @@ LÖSCHEN
     {% if display_buttons_at_top %}
         <div class="grid">
             <div>
-                <a href="{{back}}"role="button" class="secondary" style="display: block;">Zurück</a>
+                <a href="{{back}}"role="button" class="secondary" style="display: block;">{% translate "Back" %}</a>
             </div>
-            <input type="submit" value="Speichern">
+            <input type="submit" value="{%translate "Save" %}">
         </div>
     {% endif %}
     {{ form }}
     <br>
     <div class="grid">
         <div>
-            <a href="{{back}}"role="button" class="secondary" style="display: block;">Zurück</a>
+            <a href="{{back}}"role="button" class="secondary" style="display: block;">{% translate "Back" %}</a>
         </div>
-        <input type="submit" value="Speichern">
+        <input type="submit" value="{%translate "Save" %}">
     </div>
 </form>
 
@@ -46,9 +47,9 @@ LÖSCHEN
         data-target="modal-deletion"
         onClick="toggleModal(event)">
         </a>
-        <h3>{{name}} wirklich löschen?</h3>
+        <h3>{% translate "Confirmation" %}</h3>
         <p>
-        Dieser Vorgang ist nicht mehr umkehrbar!
+        {% translate "This action cannot be undone!" %}
         </p>
         <footer>
         <a href="#cancel"
@@ -56,9 +57,9 @@ LÖSCHEN
             class="secondary"
             data-target="modal-deletion"
             onClick="toggleModal(event)">
-            Abbrechen
+            {% translate "Cancel" %}
         </a>
-        <a href="{{delete_url}}"role="button" class="contrast" style="height: 50px">LÖSCHEN</a>
+        <a href="{{delete_url}}" role="button" class="contrast">{% translate "DELETE" %}</a>
         </footer>
     </article>
 </dialog>

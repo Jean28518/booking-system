@@ -1,9 +1,10 @@
 {% extends "root/base.html" %}
+{% load i18n %}
 {% block content %}
 
 {% include "booking/profile.html" %}
 
-<h2 style="margin: 0.5rem, 0;">Termin wählen</h2>
+<h2 style="margin: 0.5rem, 0;">{%translate "Select appointment" %}</h2>
 
 {% for week in weeks %}
 <div class="grid">
@@ -17,10 +18,10 @@
                 
                 <div style="padding-top: 0.5rem;">
                     {% for slot in day.slots %}
-                        <a href="{% url 'select_slot' ticket.guid day.date slot.start %}" role="button" class="secondary" style="padding: 0.4rem; margin: 0.2rem; font-size: 0.8rem;">{{ slot.start|date:"H:i" }} - {{ slot.end|date:"H:i" }} Uhr</a>
+                        <a href="{% url 'select_slot' ticket.guid day.date slot.start %}" role="button" class="secondary" style="padding: 0.4rem; margin: 0.2rem; font-size: 0.8rem;">{{ slot.start|date:"H:i" }} - {{ slot.end|date:"H:i" }} {%translate "APPENDIX_AFTER_TIME" %}</a>
                     {% endfor %}
                     {% if day.slots|length == 0 and not day.empty %}
-                        <p>Keine freien Termine</p>
+                        <p>{%translate "No available appointments" %}</p>
                     {% endif %}
                 </div>
                 </center>

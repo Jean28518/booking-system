@@ -1,18 +1,19 @@
 {% extends "root/base.html" %}
+{% load i18n %}
 {% block content %}
 
-<h2>Ticket erstellen</h2>
+<h2>{%translate "Create ticket" %}</h2>
 <form method="post">
-    <label for="description">Beschreibung (nur Du siehst diese Beschreibung):</label>
+    <label for="description">{%translate "Description (only you are able to see this)" %}:</label>
     <input type="text" name="name" id="name" value="{{default_name}}" required/>
     <div class="grid">
         <div>
-            <label for="start_date">Frühestes Datum für einen Termin:</label>
+            <label for="start_date">{%translate "Earliest date for appointment" %}:</label>
             <input type="date" name="start_date" id="start_date" aria-label="Date" value={{start_date}} required />
         </div>
 
         <div>
-            <label for="expiry_date">Ablaufdatum des Tickets:</label>
+            <label for="expiry_date">{%translate "Expiry date of ticket" %}:</label>
             <input type="date" name="expiry_date" id="expiry_date" aria-label="Date" value={{expiry_date}} required />
         </div>
     </div>
@@ -25,30 +26,30 @@
         <button type="button" class="secondary" data-value="60">60 min</button>
         <button type="button" class="secondary" data-value="90">90 min</button>
         <select name="duration_select" aria-label="Select" style="width: 20%" id="duration_select" on>
-            <option selected disabled value="" >Andere Dauer auswählen</option>
+            <option selected disabled value="" >{%translate "Select other duration" %}</option>
             <option value="75">75 min</option>
             <option value="105">105 min</option>
-            <option value="120">120 min (2 Stunden)</option>
+            <option value="120">120 min (2 {%translate "hours" %})</option>
             <option value="135">135 min</option>
-            <option value="150">150 min (2,5 Stunden)</option>
-            <option value="180">180 min (3 Stunden)</option>
-            <option value="210">210 min (3,5 Stunden)</option>
-            <option value="240">240 min (4 Stunden)</option>
-            <option value="270">270 min (4,5 Stunden)</option>
-            <option value="300">300 min (5 Stunden)</option>
-            <option value="330">330 min (5,5 Stunden)</option>
-            <option value="360">360 min (6 Stunden)</option>
-            <option value="390">390 min (6,5 Stunden)</option>
-            <option value="420">420 min (7 Stunden)</option>
-            <option value="450">450 min (7,5 Stunden)</option>
-            <option value="480">480 min (8 Stunden)</option>
+            <option value="150">150 min (2.5 {%translate "hours" %})</option>
+            <option value="180">180 min (3 {%translate "hours" %})</option>
+            <option value="210">210 min (3.5 {%translate "hours" %})</option>
+            <option value="240">240 min (4 {%translate "hours" %})</option>
+            <option value="270">270 min (4.5 {%translate "hours" %})</option>
+            <option value="300">300 min (5 {%translate "hours" %})</option>
+            <option value="330">330 min (5.5 {%translate "hours" %})</option>
+            <option value="360">360 min (6 {%translate "hours" %})</option>
+            <option value="390">390 min (6.5 {%translate "hours" %})</option>
+            <option value="420">420 min (7 {%translate "hours" %})</option>
+            <option value="450">450 min (7.5 {%translate "hours" %})</option>
+            <option value="480">480 min (8 {%translate "hours" %})</option>
         </select>
     </div>
 
-    <label for="generate_jitsi_link">Jitsi-Link erstellen</label>
+    <label for="generate_jitsi_link">{%translate "Generate jitsi link" %}</label>
     <input type="checkbox" name="generate_jitsi_link" id="generate_jitsi_link" value="on"/> <br> <br>
 
-    <input type="submit" value="Ticket erstellen"/>
+    <input type="submit" value="{%translate "Create ticket" %}"/>
        
 </form>
 
@@ -74,9 +75,6 @@ selectElement.addEventListener("change", function() {
 
 
 
-
-{% comment %} # Hello World: {% endcomment %}
-console.log('Hello World');
 
 const buttons = document.querySelectorAll('.button-group button');
 
