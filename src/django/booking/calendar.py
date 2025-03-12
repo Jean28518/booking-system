@@ -10,6 +10,8 @@ import locale
 import pytz
 from booking.timezones import common_timezones, convert_time_from_local_to_utc, convert_time_from_utc_to_local
 from django.utils.translation import gettext as _
+from django.urls import reverse
+from django.conf import settings
 
 def time_to_quarter(time):
     return time.hour * 4 + time.minute // 15
@@ -302,4 +304,5 @@ def get_ical_string_for_ticket(ticket_guid, append_description = ""):
     end = ticket.current_date + ticket.duration
     summary = booking.get_ticket_description_for_customer(ticket) + append_description
     jitsi_link = booking.get_jitsi_link_for_ticket(ticket)
-    return caldav.get_ical_string_for_event(start, end, summary, jitsi_link)
+    ticket_link = settings.BASE_URL + reverse("ticket_customer_view", args=[ticket.guid])
+    return caldav.get_ical_string_for_event(start, end, summary, jitsi_link, ticket_link)
