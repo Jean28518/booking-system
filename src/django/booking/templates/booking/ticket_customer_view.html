@@ -15,12 +15,13 @@
 
 <br>
 
-<a href="{% url "customer_change_date" ticket.guid %}" class="secondary" style="width: 12rem;">{%translate "Change appointment" %}</a><br>
 <a href="{% url "customer_cancel_ticket" ticket.guid %}" class="secondary" style="width: 12rem;">{%translate "Cancel appointment" %}</a><br>
 {% if ticket.parent_ticket %}
     <a href="{% url "recurring_ticket" ticket.parent_ticket.guid %}" class="secondary" style="width: 12rem;">{%translate "To appointment overview" %}</a><br>
 {% endif %}
 
+<br>
+<div style="font-style: italic;">{%translate "Hint: If you want to change the appointment, you have to cancel this current appointment.<br>Afterwards you can book a new appointment with the same link." %}</div>
 </center>
 
 {% endblock %}
