@@ -50,4 +50,4 @@ def send_test_email(request):
     except Exception as e:
         return render(request, "root/message.html", {"message": _("Error sending email: ") + str(e), "url": reverse("email_settings")})
     
-    return render(request, "root/message.html", {"message": _("Test email has been sent")})
+    return render(request, "root/message.html", {"message": _("Test email has been sent"), "url": reverse("email_settings")})
