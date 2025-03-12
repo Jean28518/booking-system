@@ -39,7 +39,7 @@ exit
 
 
 cd src/django
-python3 -m venv .env
+python3 -m venv .venv
 ```
 
 Now you can run the `run_development.sh` file.

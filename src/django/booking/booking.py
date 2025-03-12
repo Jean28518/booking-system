@@ -1,4 +1,7 @@
-from datetime import date
+from datetime import date, timedelta, datetime
+from django.core.mail import send_mail
+from django.conf import settings
+from django.urls import reverse
 
 
 from .models import BookingSettings, Ticket
@@ -50,3 +53,32 @@ def get_jitsi_link_for_ticket(ticket: Ticket):
         return "https://meet.jit.si/" + ticket.guid
     else:
         return ""
+    
+
+# This function has to be called by a cronjob every 5 minutes
+def send_reminder_mails():
+    """Sends reminder mails to customer with tickets which appointment is tomorrow at the same time."""
+    tomorrow = date.today() + timedelta(days=1)
+    # Get all the tickets which are booked for tomorrow (current_date.date() == tomorrow)
+    tickets = Ticket.objects.filter(current_date__date=tomorrow)
+    for ticket in tickets:
+        ticket_time = ticket.current_date.time()
+        current_time = datetime.now().time()
+        # If the current time is near to 3 minutes before the ticket time, send the mail
+        if ticket_time.hour == current_time.hour and abs(ticket_time.minute - current_time.minute) <= 2:
+            # Send mail to customer
+            if not ticket.email_of_customer:
+                continue
+            guid = ticket.guid
+            print("Sending reminder mail to: " + ticket.email_of_customer)
+            ticket_time = ticket.current_date.time()
+            # Send mail
+            send_mail(
+                _("Reminder: Your appointment with") + " " + ticket.assigned_user.first_name + " " + ticket.assigned_user.last_name + " " + _("is tomorrow at") + " "  + ticket_time.strftime("%H:%M") + _("APPENDIX_AFTER_TIME") + ".",
+                _("You have an appointment with") + " " + ticket.assigned_user.first_name + " " + ticket.assigned_user.last_name + " " + _("tomorrow at") + " " + ticket_time.strftime("%H:%M") + _("APPENDIX_AFTER_TIME") + "." + "\n" + _("If you want to change or cancel the appointment, please visit the following link") + ":" + " " + settings.BASE_URL + reverse("ticket_customer_view", args=[guid]), 
+                settings.EMAIL_HOST_USER,
+                [ticket.email_of_customer],
+                fail_silently=False
+            )
+            
+        
