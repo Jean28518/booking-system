@@ -9,6 +9,10 @@ services:
       - static:/static
     image: python:3.12-bullseye
     entrypoint: sh /docker-entrypoint.sh
+    environment:
+      - SECRET_KEY=django-insecure-123
+      - DEBUG=True
+      - HOST=booking.example.com
 
   caddy:
     restart: unless-stopped
@@ -16,12 +20,14 @@ services:
       - "10324:80"
     volumes:
       - ./src/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
-      - ./caddy_data:/data
-      - ./caddy_config:/config
+      - caddy_data:/data
+      - caddy_config:/config
       - static:/static
       - ./src/django:/app
     image: caddy:latest
 
   
 volumes:
+  caddy_data:
+  caddy_config:
   static:

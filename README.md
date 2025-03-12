@@ -4,14 +4,11 @@
 
 ```bash
 git clone https://github.com/Jean28518/booking-system.git
-cd booking-system
-vim src/django/root/settings.py
-DEBUG = False
-ALLOWED_HOSTS = ["*"]
-BASE_URL = "https://booking.int.de/"
 
-
+vim docker-compose.yml
+# Change here the environment variables to your needs
 docker-compose up -d
+# The first startup needs about 2 to 5 minutes.
 
 vim /etc/caddy/Caddyfile
 booking.int.de {
