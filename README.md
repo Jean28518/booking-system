@@ -4,12 +4,13 @@
 
 ```bash
 git clone https://github.com/Jean28518/booking-system.git
-
+cd booking-system
 vim docker-compose.yml
 # Change here the environment variables to your needs
 docker-compose up -d
 # The first startup needs about 2 to 5 minutes.
 
+# Insert the following lines into your Caddyfile (if you use Caddy as reverse proxy)
 vim /etc/caddy/Caddyfile
 booking.int.de {
   reverse_proxy localhost:10324
