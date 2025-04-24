@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-04-24 13:27+0100\n"
-"PO-Revision-Date: 2025-04-24 13:40+0100\n"
+"PO-Revision-Date: 2025-04-24 13:59+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: de\n"
@@ -151,8 +151,6 @@ msgid "Administrator settings"
 msgstr "Administrator-Einstellungen"
 
 #: booking/booking.py:20 booking/booking.py:21
-#, fuzzy
-#| msgid "Appointment"
 msgid "Appointment with"
 msgstr "Termin mit"
 
@@ -162,8 +160,6 @@ msgid "Appointment"
 msgstr "Termin"
 
 #: booking/booking.py:77
-#, fuzzy
-#| msgid "Earliest date for appointment"
 msgid "Reminder: Your appointment with"
 msgstr "Erinnerung: Ihr Termin mit"
 
@@ -182,8 +178,6 @@ msgid "APPENDIX_AFTER_TIME"
 msgstr "Uhr"
 
 #: booking/booking.py:78
-#, fuzzy
-#| msgid "Change appointment"
 msgid "You have an appointment with"
 msgstr "Sie haben einen Termin mit"
 
@@ -213,8 +207,6 @@ msgid "CalDAV URL"
 msgstr "CalDAV-URL"
 
 #: booking/forms.py:16
-#, fuzzy
-#| msgid "Calendar"
 msgid "Main calendar"
 msgstr "Hauptkalender"
 
@@ -223,20 +215,14 @@ msgid "Customer Link"
 msgstr "Kundenlink"
 
 #: booking/forms.py:35
-#, fuzzy
-#| msgid "No available appointments"
 msgid "First available date"
 msgstr "Erstes verfügbares Datum"
 
 #: booking/forms.py:36
-#, fuzzy
-#| msgid "Duration"
 msgid "Duration (Hours)"
 msgstr "Dauer (Stunden)"
 
 #: booking/forms.py:37
-#, fuzzy
-#| msgid "Expiry date of ticket"
 msgid "Expiry date"
 msgstr "Ablaufdatum"
 
@@ -249,8 +235,6 @@ msgid "Recurring (this ticket will allow booking multiple appointments)"
 msgstr "Wiederkehrend (dieses Ticket erlaubt die Buchung mehrerer Termine)"
 
 #: booking/forms.py:56
-#, fuzzy
-#| msgid "Earliest date for appointment"
 msgid "Earliest booking time"
 msgstr "Früheste Buchungszeit"
 
@@ -261,8 +245,6 @@ msgstr "Spätestes Buchungsende (Wann ist Ihr Arbeitstag zu Ende?)"
 #: booking/forms.py:58 booking/forms.py:59 booking/forms.py:60
 #: booking/forms.py:61 booking/forms.py:62 booking/forms.py:63
 #: booking/forms.py:64
-#, fuzzy
-#| msgid "Appointment"
 msgid "Appointments on"
 msgstr "Termine am"
 
@@ -307,8 +289,6 @@ msgid "Description"
 msgstr "Beschreibung"
 
 #: booking/forms.py:85
-#, fuzzy
-#| msgid "Generate jitsi link"
 msgid "Create Jitsi link"
 msgstr "Jitsi-Link erstellen"
 
@@ -431,14 +411,10 @@ msgid "Link to meeting"
 msgstr "Link zum Meeting"
 
 #: booking/templates/booking/ticket_customer_view.html:18
-#, fuzzy
-#| msgid "Cancle appointment"
 msgid "Cancel appointment"
 msgstr "Termin stornieren"
 
 #: booking/templates/booking/ticket_customer_view.html:20
-#, fuzzy
-#| msgid "Confirm appointment now"
 msgid "To appointment overview"
 msgstr "Zur Terminübersicht"
 
@@ -451,14 +427,10 @@ msgid "Error: Please fill out all fields"
 msgstr "Fehler: Bitte füllen Sie alle Felder aus"
 
 #: booking/views.py:45 booking/views.py:200
-#, fuzzy
-#| msgid "Tickets"
 msgid "Ticket from"
 msgstr "Ticket von"
 
 #: booking/views.py:56
-#, fuzzy
-#| msgid "Calendar"
 msgid "Calendars"
 msgstr "Kalender"
 
@@ -467,8 +439,6 @@ msgid "Calendar"
 msgstr "Kalender"
 
 #: booking/views.py:60
-#, fuzzy
-#| msgid "Calendar"
 msgid "Main Calendar"
 msgstr "Hauptkalender"
 
@@ -485,8 +455,6 @@ msgid "Error creating calendar"
 msgstr "Fehler beim Erstellen des Kalenders"
 
 #: booking/views.py:104 booking/views.py:312
-#, fuzzy
-#| msgid "Settings saved."
 msgid "Changes saved"
 msgstr "Änderungen gespeichert"
 
@@ -495,8 +463,6 @@ msgid "Error editing calendar"
 msgstr "Fehler beim Bearbeiten des Kalenders"
 
 #: booking/views.py:114
-#, fuzzy
-#| msgid "Calendar"
 msgid "Calendar deleted"
 msgstr "Kalender gelöscht"
 
@@ -510,14 +476,10 @@ msgid "This is not a recurring ticket."
 msgstr "Dies ist kein wiederkehrendes Ticket."
 
 #: booking/views.py:143
-#, fuzzy
-#| msgid "Appointment"
 msgid "Appointments with"
 msgstr "Termine mit"
 
 #: booking/views.py:144 booking/views.py:259
-#, fuzzy
-#| msgid "Tickets"
 msgid "Ticket"
 msgstr "Ticket"
 
@@ -526,8 +488,6 @@ msgid "Booked Date"
 msgstr "Gebuchtes Datum"
 
 #: booking/views.py:151
-#, fuzzy
-#| msgid "Change appointment"
 msgid "Create a new appointment"
 msgstr "Neuen Termin erstellen"
 
@@ -552,14 +512,10 @@ msgid "You need to be logged in to delete a ticket."
 msgstr "Sie müssen angemeldet sein, um ein Ticket zu löschen."
 
 #: booking/views.py:314
-#, fuzzy
-#| msgid "Create ticket"
 msgid "Error editing ticket"
 msgstr "Fehler beim Bearbeiten des Tickets"
 
 #: booking/views.py:332
-#, fuzzy
-#| msgid "Settings saved."
 msgid "Changes saved."
 msgstr "Änderungen gespeichert."
 
@@ -568,8 +524,6 @@ msgid "Error editing settings."
 msgstr "Fehler beim Bearbeiten der Einstellungen."
 
 #: booking/views.py:337
-#, fuzzy
-#| msgid "Settings"
 msgid "Booking Settings"
 msgstr "Buchungseinstellungen"
 
@@ -586,8 +540,6 @@ msgid "An error occurred. Please select another slot!"
 msgstr "Ein Fehler ist aufgetreten. Bitte wählen Sie einen anderen Zeitslot!"
 
 #: booking/views.py:397
-#, fuzzy
-#| msgid "Link to meeting"
 msgid "Link to the meeting"
 msgstr "Link zum Meeting"
 
@@ -612,8 +564,6 @@ msgid "canceled."
 msgstr "storniert."
 
 #: booking/views.py:444
-#, fuzzy
-#| msgid "Change appointment"
 msgid "The appointment on"
 msgstr "Der Termin am"
 
@@ -634,8 +584,6 @@ msgid "Error: Please select a timezone."
 msgstr "Fehler: Bitte wählen Sie eine Zeitzone aus."
 
 #: mails/forms.py:5
-#, fuzzy
-#| msgid "E-Mail"
 msgid "E-Mail Server"
 msgstr "E-Mail-Server"
 
@@ -644,8 +592,6 @@ msgid "mail.example.com"
 msgstr "mail.example.com"
 
 #: mails/forms.py:6
-#, fuzzy
-#| msgid "E-Mail"
 msgid "E-Mail Port"
 msgstr "E-Mail-Port"
 
@@ -654,8 +600,6 @@ msgid "587"
 msgstr "587"
 
 #: mails/forms.py:7
-#, fuzzy
-#| msgid "Username"
 msgid "E-Mail Username"
 msgstr "E-Mail-Benutzername"
 
@@ -733,8 +677,6 @@ msgstr "Einreichen"
 
 #: root/templates/root/create_x.html:8 root/templates/root/create_x.html:21
 #: root/templates/root/create_x.html:30 root/templates/root/overview_x.html:10
-#, fuzzy
-#| msgid "Create ticket"
 msgid "Create"
 msgstr "Erstellen"
 
@@ -743,8 +685,6 @@ msgid "Edit"
 msgstr "Bearbeiten"
 
 #: root/templates/root/edit_x.html:51 root/templates/root/overview_x.html:73
-#, fuzzy
-#| msgid "Confirm appointment"
 msgid "Confirmation"
 msgstr "Bestätigung"
 
