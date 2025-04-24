@@ -393,6 +393,8 @@ def create_caldav_event(start: datetime.datetime, end: datetime.datetime, uid: s
     if cfg.get_value("skip_ssl_check", False):
         http.disable_ssl_certificate_validation = True
 
+    summary = summary.replace("€", "EUR")
+
     headers = {
         "Content-Type": "text/calendar",
     }
