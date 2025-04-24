@@ -13,6 +13,7 @@ services:
       - SECRET_KEY=django-insecure-123
       - DEBUG=True
       - HOST=booking.example.com
+      - LANGUAGE_CODE=en
 
   caddy:
     restart: unless-stopped

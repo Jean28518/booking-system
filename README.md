@@ -35,6 +35,9 @@ sed -i 's/# en_GB.UTF-8 UTF-8/en_GB.UTF-8 UTF-8/' /etc/locale.gen
 locale-gen
 exit
 
+# How to generate the .po files for translation
+bash generate_po_files.sh
+
 
 cd src/django
 python3 -m venv .venv

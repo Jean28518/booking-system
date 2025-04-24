@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-15 15:05+0000\n"
-"PO-Revision-Date: 2025-04-15 12:59+0100\n"
+"POT-Creation-Date: 2025-04-24 13:27+0100\n"
+"PO-Revision-Date: 2025-04-24 13:40+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: de\n"
@@ -19,10 +19,12 @@ msgstr ""
 "X-Generator: Poedit 3.2.2\n"
 
 #: accounts/forms.py:6 accounts/forms.py:10 accounts/forms.py:20
+#: booking/forms.py:14
 msgid "Username"
 msgstr "Benutzername"
 
-#: accounts/forms.py:7 accounts/forms.py:11
+#: accounts/forms.py:7 accounts/forms.py:11 booking/forms.py:15
+#: mails/forms.py:8
 msgid "Password"
 msgstr "Passwort"
 
@@ -66,6 +68,10 @@ msgstr "Profilbild"
 msgid "Enable registration"
 msgstr "Aktiviere Registrierung"
 
+#: accounts/forms.py:30
+msgid "Skip SSL check"
+msgstr "SSL-Prüfung überspringen"
+
 #: accounts/views.py:33
 msgid "Username or password incorrect"
 msgstr "Nutzername oder Passwort nicht korrekt"
@@ -84,11 +90,11 @@ msgstr "Registrieren"
 
 #: accounts/views.py:50
 msgid "Registration disabled. Please contact the administrator."
-msgstr "Registrierung deaktiviert. Bitte den Systemadministrator kontaktieren"
+msgstr "Registrierung deaktiviert. Bitte den Systemadministrator kontaktieren."
 
 #: accounts/views.py:61
 msgid "Username already taken"
-msgstr "Nutzername wurde schon vergeben."
+msgstr "Nutzername wurde schon vergeben"
 
 #: accounts/views.py:73
 msgid "Passwords do not match"
@@ -126,76 +132,234 @@ msgstr "Profil aktualisiert"
 msgid "Profile"
 msgstr "Profil"
 
-#: accounts/views.py:141 accounts/views.py:173
+#: accounts/views.py:141 accounts/views.py:176 booking/views.py:341
+#: mails/views.py:30 root/templates/root/edit_x.html:27
+#: root/templates/root/edit_x.html:36
 msgid "Save"
 msgstr "Speichern"
 
-#: accounts/views.py:169
+#: accounts/views.py:170
 msgid "Settings saved."
 msgstr "Einstellungen gespeichert."
 
-#: accounts/views.py:171
+#: accounts/views.py:172
 msgid "Invalid input"
 msgstr "Falsche Eingabe"
 
-#: accounts/views.py:173 root/templates/root/base.html:136
+#: accounts/views.py:176 root/templates/root/base.html:136
 msgid "Administrator settings"
 msgstr "Administrator-Einstellungen"
 
-#: booking/templates/booking/booking_confirmation.html:7
-msgid "Confirm appointment"
-msgstr "Buchung bestätigen"
+#: booking/booking.py:20 booking/booking.py:21
+#, fuzzy
+#| msgid "Appointment"
+msgid "Appointment with"
+msgstr "Termin mit"
 
-#: booking/templates/booking/booking_confirmation.html:9
+#: booking/booking.py:22 booking/templates/booking/booking_confirmation.html:10
+#: booking/views.py:202 booking/views.py:399 booking/views.py:443
 msgid "Appointment"
 msgstr "Termin"
 
-#: booking/templates/booking/booking_confirmation.html:9
-msgid "at"
-msgstr "bei"
+#: booking/booking.py:77
+#, fuzzy
+#| msgid "Earliest date for appointment"
+msgid "Reminder: Your appointment with"
+msgstr "Erinnerung: Ihr Termin mit"
 
-#: booking/templates/booking/booking_confirmation.html:9
+#: booking/booking.py:77
+msgid "is tomorrow at"
+msgstr "ist morgen um"
+
+#: booking/booking.py:77 booking/booking.py:78
+#: booking/templates/booking/booking_confirmation.html:10
 #: booking/templates/booking/select_slot.html:21
-#: booking/templates/booking/ticket_customer_view.html:12
+#: booking/templates/booking/ticket_customer_view.html:12 booking/views.py:45
+#: booking/views.py:399 booking/views.py:400 booking/views.py:413
+#: booking/views.py:414 booking/views.py:444 booking/views.py:452
+#: booking/views.py:453
 msgid "APPENDIX_AFTER_TIME"
 msgstr "Uhr"
 
-#: booking/templates/booking/booking_confirmation.html:10
+#: booking/booking.py:78
+#, fuzzy
+#| msgid "Change appointment"
+msgid "You have an appointment with"
+msgstr "Sie haben einen Termin mit"
+
+#: booking/booking.py:78
+msgid "tomorrow at"
+msgstr "morgen um"
+
+#: booking/booking.py:78
+msgid "If you want to change or cancel the appointment, please visit the following link"
+msgstr "Wenn Sie den Termin ändern oder stornieren möchten, besuchen Sie bitte den folgenden Link"
+
+#: booking/calendar.py:158
+msgid "Today"
+msgstr "Heute"
+
+#: booking/calendar.py:163
+msgid "Tomorrow"
+msgstr "Morgen"
+
+#: booking/forms.py:12 booking/forms.py:34 booking/views.py:60
+#: booking/views.py:147 booking/views.py:262
+msgid "Name"
+msgstr "Name"
+
+#: booking/forms.py:13
+msgid "CalDAV URL"
+msgstr "CalDAV-URL"
+
+#: booking/forms.py:16
+#, fuzzy
+#| msgid "Calendar"
+msgid "Main calendar"
+msgstr "Hauptkalender"
+
+#: booking/forms.py:28
+msgid "Customer Link"
+msgstr "Kundenlink"
+
+#: booking/forms.py:35
+#, fuzzy
+#| msgid "No available appointments"
+msgid "First available date"
+msgstr "Erstes verfügbares Datum"
+
+#: booking/forms.py:36
+#, fuzzy
+#| msgid "Duration"
+msgid "Duration (Hours)"
+msgstr "Dauer (Stunden)"
+
+#: booking/forms.py:37
+#, fuzzy
+#| msgid "Expiry date of ticket"
+msgid "Expiry date"
+msgstr "Ablaufdatum"
+
+#: booking/forms.py:38 booking/templates/booking/index.html:49
+msgid "Generate jitsi link"
+msgstr "Jitsi-Link generieren"
+
+#: booking/forms.py:39 booking/templates/booking/index.html:52
+msgid "Recurring (this ticket will allow booking multiple appointments)"
+msgstr "Wiederkehrend (dieses Ticket erlaubt die Buchung mehrerer Termine)"
+
+#: booking/forms.py:56
+#, fuzzy
+#| msgid "Earliest date for appointment"
+msgid "Earliest booking time"
+msgstr "Früheste Buchungszeit"
+
+#: booking/forms.py:57
+msgid "Latest booking end (when do you finish work?)"
+msgstr "Spätestes Buchungsende (Wann ist Ihr Arbeitstag zu Ende?)"
+
+#: booking/forms.py:58 booking/forms.py:59 booking/forms.py:60
+#: booking/forms.py:61 booking/forms.py:62 booking/forms.py:63
+#: booking/forms.py:64
+#, fuzzy
+#| msgid "Appointment"
+msgid "Appointments on"
+msgstr "Termine am"
+
+#: booking/forms.py:58
+msgid "Monday"
+msgstr "Montag"
+
+#: booking/forms.py:59
+msgid "Tuesday"
+msgstr "Dienstag"
+
+#: booking/forms.py:60
+msgid "Wednesday"
+msgstr "Mittwoch"
+
+#: booking/forms.py:61
+msgid "Thursday"
+msgstr "Donnerstag"
+
+#: booking/forms.py:62
+msgid "Friday"
+msgstr "Freitag"
+
+#: booking/forms.py:63
+msgid "Saturday"
+msgstr "Samstag"
+
+#: booking/forms.py:64
+msgid "Sunday"
+msgstr "Sonntag"
+
+#: booking/forms.py:65
+msgid "Jitsi server base URL"
+msgstr "Jitsi-Server Basis-URL"
+
+#: booking/forms.py:66
+msgid "Maximum future booking time (in days)"
+msgstr "Maximale Buchungsfrist in die Zukunft (in Tagen)"
+
+#: booking/forms.py:84 booking/templates/booking/ticket_created.html:11
+msgid "Description"
+msgstr "Beschreibung"
+
+#: booking/forms.py:85
+#, fuzzy
+#| msgid "Generate jitsi link"
+msgid "Create Jitsi link"
+msgstr "Jitsi-Link erstellen"
+
+#: booking/forms.py:87 booking/templates/booking/booking_confirmation.html:11
 #: booking/templates/booking/ticket_created.html:13
-#: booking/templates/booking/ticket_customer_view.html:13
+#: booking/templates/booking/ticket_customer_view.html:13 booking/views.py:147
+#: booking/views.py:262
 msgid "Duration"
 msgstr "Dauer"
 
-#: booking/templates/booking/booking_confirmation.html:10
-#: booking/templates/booking/ticket_customer_view.html:13
+#: booking/forms.py:87 booking/templates/booking/booking_confirmation.html:11
+#: booking/templates/booking/ticket_customer_view.html:13 booking/views.py:414
 msgid "minutes"
 msgstr "Minuten"
 
-#: booking/templates/booking/booking_confirmation.html:13
+#: booking/templates/booking/booking_confirmation.html:8
+msgid "Confirm appointment"
+msgstr "Buchung bestätigen"
+
+#: booking/templates/booking/booking_confirmation.html:10
+msgid "at"
+msgstr "um"
+
+#: booking/templates/booking/booking_confirmation.html:14
 msgid "Appointment confirmation for the own calendar"
 msgstr "Terminbestätigung für den eigenen Kalender"
 
-#: booking/templates/booking/booking_confirmation.html:14
+#: booking/templates/booking/booking_confirmation.html:15
 msgid "E-Mail (optional)"
 msgstr "E-Mail (optional)"
 
-#: booking/templates/booking/booking_confirmation.html:21
-#: root/templates/root/confirm.html:18 root/templates/root/generic_form.html:34
+#: booking/templates/booking/booking_confirmation.html:22
+#: root/templates/root/confirm.html:19 root/templates/root/create_x.html:19
+#: root/templates/root/create_x.html:28 root/templates/root/edit_x.html:25
+#: root/templates/root/edit_x.html:34 root/templates/root/generic_form.html:23
+#: root/templates/root/generic_form.html:34
 msgid "Back"
 msgstr "Zurück"
 
-#: booking/templates/booking/booking_confirmation.html:23
+#: booking/templates/booking/booking_confirmation.html:24
 msgid "Confirm appointment now"
 msgstr "Buchung jetzt bestätigen"
 
 #: booking/templates/booking/index.html:5
-#: booking/templates/booking/index.html:52
+#: booking/templates/booking/index.html:55
 msgid "Create ticket"
 msgstr "Ticket erstellen"
 
 #: booking/templates/booking/index.html:7
 msgid "Description (only you are able to see this)"
-msgstr "Beschreibung (privat)"
+msgstr "Beschreibung (nur für Sie sichtbar)"
 
 #: booking/templates/booking/index.html:11
 #: booking/templates/booking/ticket_created.html:12
@@ -226,10 +390,6 @@ msgstr "Andere Dauer auswählen"
 msgid "hours"
 msgstr "Stunden"
 
-#: booking/templates/booking/index.html:49
-msgid "Generate jitsi link"
-msgstr "Jitsi-Link generieren"
-
 #: booking/templates/booking/select_slot.html:7
 msgid "Select appointment"
 msgstr "Termin auswählen"
@@ -242,13 +402,9 @@ msgstr "Keine verfügbaren Termine"
 msgid "Ticket created"
 msgstr "Ticket erstellt"
 
-#: booking/templates/booking/ticket_created.html:11
-msgid "Description"
-msgstr "Beschreibung"
-
 #: booking/templates/booking/ticket_created.html:18
 msgid "Send this link to the customer so that an appointment can be made"
-msgstr "Sende diesen Link dem Kunden, damit dieser einen Termin ausmachen kann"
+msgstr "Senden Sie diesen Link dem Kunden, damit dieser einen Termin ausmachen kann"
 
 #: booking/templates/booking/ticket_created.html:20
 msgid "Click on the link to copy in the clipboard"
@@ -260,11 +416,11 @@ msgstr "Zurück zum Start"
 
 #: booking/templates/booking/ticket_created.html:43
 msgid "Link was copied into clipboard"
-msgstr "Link kopiert"
+msgstr "Link in die Zwischenablage kopiert"
 
 #: booking/templates/booking/ticket_customer_view.html:11
 msgid "Agreed appointment"
-msgstr "Termin vereinbart"
+msgstr "Vereinbarter Termin"
 
 #: booking/templates/booking/ticket_customer_view.html:12
 msgid "Time"
@@ -275,37 +431,289 @@ msgid "Link to meeting"
 msgstr "Link zum Meeting"
 
 #: booking/templates/booking/ticket_customer_view.html:18
-msgid "Change appointment"
-msgstr "Termin ändern"
+#, fuzzy
+#| msgid "Cancle appointment"
+msgid "Cancel appointment"
+msgstr "Termin stornieren"
 
-#: booking/templates/booking/ticket_customer_view.html:19
-msgid "Cancle appointment"
-msgstr "Termin absagen"
+#: booking/templates/booking/ticket_customer_view.html:20
+#, fuzzy
+#| msgid "Confirm appointment now"
+msgid "To appointment overview"
+msgstr "Zur Terminübersicht"
 
-#: booking/views.py:385
-#, python-format
-msgid "The current time is %(time)s"
-msgstr "Die aktuelle Zeit ist %(time)s"
+#: booking/templates/booking/ticket_customer_view.html:24
+msgid "Hint: If you want to change the appointment, you have to cancel this current appointment.<br>Afterwards you can book a new appointment with the same link."
+msgstr "Hinweis: Wenn Sie den Termin ändern möchten, müssen Sie diesen aktuellen Termin stornieren.<br>Anschließend können Sie mit demselben Link einen neuen Termin buchen."
 
-#: root/settings.py:123
+#: booking/views.py:37
+msgid "Error: Please fill out all fields"
+msgstr "Fehler: Bitte füllen Sie alle Felder aus"
+
+#: booking/views.py:45 booking/views.py:200
+#, fuzzy
+#| msgid "Tickets"
+msgid "Ticket from"
+msgstr "Ticket von"
+
+#: booking/views.py:56
+#, fuzzy
+#| msgid "Calendar"
+msgid "Calendars"
+msgstr "Kalender"
+
+#: booking/views.py:57 booking/views.py:88 root/templates/root/base.html:120
+msgid "Calendar"
+msgstr "Kalender"
+
+#: booking/views.py:60
+#, fuzzy
+#| msgid "Calendar"
+msgid "Main Calendar"
+msgstr "Hauptkalender"
+
+#: booking/views.py:69
+msgid "No main calendar has been set. This is necessary to save bookings."
+msgstr "Es wurde kein Hauptkalender festgelegt. Dies ist notwendig, um Buchungen speichern zu können."
+
+#: booking/views.py:85
+msgid "Calendar successfully created"
+msgstr "Kalender erfolgreich erstellt"
+
+#: booking/views.py:87
+msgid "Error creating calendar"
+msgstr "Fehler beim Erstellen des Kalenders"
+
+#: booking/views.py:104 booking/views.py:312
+#, fuzzy
+#| msgid "Settings saved."
+msgid "Changes saved"
+msgstr "Änderungen gespeichert"
+
+#: booking/views.py:106
+msgid "Error editing calendar"
+msgstr "Fehler beim Bearbeiten des Kalenders"
+
+#: booking/views.py:114
+#, fuzzy
+#| msgid "Calendar"
+msgid "Calendar deleted"
+msgstr "Kalender gelöscht"
+
+#: booking/views.py:122 booking/views.py:163 booking/views.py:211
+#: booking/views.py:276
+msgid "The ticket has expired."
+msgstr "Das Ticket ist abgelaufen."
+
+#: booking/views.py:124 booking/views.py:165
+msgid "This is not a recurring ticket."
+msgstr "Dies ist kein wiederkehrendes Ticket."
+
+#: booking/views.py:143
+#, fuzzy
+#| msgid "Appointment"
+msgid "Appointments with"
+msgstr "Termine mit"
+
+#: booking/views.py:144 booking/views.py:259
+#, fuzzy
+#| msgid "Tickets"
+msgid "Ticket"
+msgstr "Ticket"
+
+#: booking/views.py:147 booking/views.py:262
+msgid "Booked Date"
+msgstr "Gebuchtes Datum"
+
+#: booking/views.py:151
+#, fuzzy
+#| msgid "Change appointment"
+msgid "Create a new appointment"
+msgstr "Neuen Termin erstellen"
+
+#: booking/views.py:174
+msgid "The duration is too long. Please select a shorter duration."
+msgstr "Die Dauer ist zu lang. Bitte wählen Sie eine kürzere Dauer."
+
+#: booking/views.py:258 root/templates/root/base.html:119
+msgid "Tickets"
+msgstr "Tickets"
+
+#: booking/views.py:262
+msgid "Recurring"
+msgstr "Wiederkehrend"
+
+#: booking/views.py:267
+msgid "Tickets can also be shared via the link"
+msgstr "Tickets können auch über den Link geteilt werden"
+
+#: booking/views.py:281
+msgid "You need to be logged in to delete a ticket."
+msgstr "Sie müssen angemeldet sein, um ein Ticket zu löschen."
+
+#: booking/views.py:314
+#, fuzzy
+#| msgid "Create ticket"
+msgid "Error editing ticket"
+msgstr "Fehler beim Bearbeiten des Tickets"
+
+#: booking/views.py:332
+#, fuzzy
+#| msgid "Settings saved."
+msgid "Changes saved."
+msgstr "Änderungen gespeichert."
+
+#: booking/views.py:334
+msgid "Error editing settings."
+msgstr "Fehler beim Bearbeiten der Einstellungen."
+
+#: booking/views.py:337
+#, fuzzy
+#| msgid "Settings"
+msgid "Booking Settings"
+msgstr "Buchungseinstellungen"
+
+#: booking/views.py:371
+msgid "An error occurred. Please select another slot."
+msgstr "Ein Fehler ist aufgetreten. Bitte wählen Sie einen anderen Zeitslot."
+
+#: booking/views.py:375
+msgid "Your session has expired. Please select a slot again."
+msgstr "Ihre Sitzung ist abgelaufen. Bitte wählen Sie erneut einen Zeitslot."
+
+#: booking/views.py:383
+msgid "An error occurred. Please select another slot!"
+msgstr "Ein Fehler ist aufgetreten. Bitte wählen Sie einen anderen Zeitslot!"
+
+#: booking/views.py:397
+#, fuzzy
+#| msgid "Link to meeting"
+msgid "Link to the meeting"
+msgstr "Link zum Meeting"
+
+#: booking/views.py:399 booking/views.py:413 booking/views.py:414
+msgid "booked. Date: "
+msgstr "gebucht. Datum: "
+
+#: booking/views.py:400
+msgid "The appointment was booked on"
+msgstr "Der Termin wurde gebucht am"
+
+#: booking/views.py:414
+msgid "with a duration of"
+msgstr "mit einer Dauer von"
+
+#: booking/views.py:414 booking/views.py:453
+msgid "Hint: You can manage the appointment at any time via the following link"
+msgstr "Hinweis: Sie können den Termin jederzeit über den folgenden Link verwalten"
+
+#: booking/views.py:443
+msgid "canceled."
+msgstr "storniert."
+
+#: booking/views.py:444
+#, fuzzy
+#| msgid "Change appointment"
+msgid "The appointment on"
+msgstr "Der Termin am"
+
+#: booking/views.py:444
+msgid "was canceled."
+msgstr "wurde storniert."
+
+#: booking/views.py:452 booking/views.py:453
+msgid "canceled. Date: "
+msgstr "storniert. Datum: "
+
+#: booking/views.py:458
+msgid "Appointment canceled. If you want to book the appointment again, you will be redirected to the booking page."
+msgstr "Termin storniert. Wenn Sie den Termin erneut buchen möchten, werden Sie zur Buchungsseite weitergeleitet."
+
+#: booking/views.py:474
+msgid "Error: Please select a timezone."
+msgstr "Fehler: Bitte wählen Sie eine Zeitzone aus."
+
+#: mails/forms.py:5
+#, fuzzy
+#| msgid "E-Mail"
+msgid "E-Mail Server"
+msgstr "E-Mail-Server"
+
+#: mails/forms.py:5
+msgid "mail.example.com"
+msgstr "mail.example.com"
+
+#: mails/forms.py:6
+#, fuzzy
+#| msgid "E-Mail"
+msgid "E-Mail Port"
+msgstr "E-Mail-Port"
+
+#: mails/forms.py:6
+msgid "587"
+msgstr "587"
+
+#: mails/forms.py:7
+#, fuzzy
+#| msgid "Username"
+msgid "E-Mail Username"
+msgstr "E-Mail-Benutzername"
+
+#: mails/forms.py:7
+msgid "example@example.com"
+msgstr "example@example.com"
+
+#: mails/forms.py:8
+msgid "E-Mail Password"
+msgstr "E-Mail-Passwort"
+
+#: mails/forms.py:9
+msgid "E-Mail Encryption"
+msgstr "E-Mail-Verschlüsselung"
+
+#: mails/views.py:29
+msgid "Email Settings"
+msgstr "E-Mail-Einstellungen"
+
+#: mails/views.py:31
+msgid "Send Test Email"
+msgstr "Test-E-Mail senden"
+
+#: mails/views.py:38
+msgid "Please provide an email address in your user settings"
+msgstr "Bitte geben Sie eine E-Mail-Adresse in Ihren Benutzereinstellungen an"
+
+#: mails/views.py:40
+msgid "Please configure the email settings"
+msgstr "Bitte konfigurieren Sie die E-Mail-Einstellungen"
+
+#: mails/views.py:44
+msgid "Test Email"
+msgstr "Test-E-Mail"
+
+#: mails/views.py:45
+msgid "This is a test email"
+msgstr "Dies ist eine Test-E-Mail"
+
+#: mails/views.py:51
+msgid "Error sending email: "
+msgstr "Fehler beim Senden der E-Mail: "
+
+#: mails/views.py:53
+msgid "Test email has been sent"
+msgstr "Test-E-Mail wurde gesendet"
+
+#: root/settings.py:128
 msgid "language.en"
 msgstr "Englisch"
 
-#: root/settings.py:124
+#: root/settings.py:129
 msgid "language.de"
 msgstr "Deutsch"
 
 #: root/templates/root/base.html:109
 msgid "Timezone"
 msgstr "Zeitzone"
-
-#: root/templates/root/base.html:119
-msgid "Tickets"
-msgstr "Tickets"
-
-#: root/templates/root/base.html:120
-msgid "Calendar"
-msgstr "Kalendar"
 
 #: root/templates/root/base.html:131
 msgid "Settings"
@@ -319,10 +727,47 @@ msgstr "E-Mail Einstellungen"
 msgid "Logout"
 msgstr "Abmelden"
 
-#: root/templates/root/confirm.html:20
+#: root/templates/root/confirm.html:21
 msgid "Submit"
 msgstr "Einreichen"
+
+#: root/templates/root/create_x.html:8 root/templates/root/create_x.html:21
+#: root/templates/root/create_x.html:30 root/templates/root/overview_x.html:10
+#, fuzzy
+#| msgid "Create ticket"
+msgid "Create"
+msgstr "Erstellen"
+
+#: root/templates/root/edit_x.html:5 root/templates/root/overview_x.html:27
+msgid "Edit"
+msgstr "Bearbeiten"
+
+#: root/templates/root/edit_x.html:51 root/templates/root/overview_x.html:73
+#, fuzzy
+#| msgid "Confirm appointment"
+msgid "Confirmation"
+msgstr "Bestätigung"
+
+#: root/templates/root/edit_x.html:53 root/templates/root/overview_x.html:75
+msgid "This action cannot be undone!"
+msgstr "Diese Aktion kann nicht rückgängig gemacht werden!"
+
+#: root/templates/root/edit_x.html:61 root/templates/root/overview_x.html:83
+msgid "Cancel"
+msgstr "Abbrechen"
+
+#: root/templates/root/edit_x.html:63 root/templates/root/overview_x.html:85
+msgid "DELETE"
+msgstr "LÖSCHEN"
 
 #: root/templates/root/message.html:14
 msgid "Next"
 msgstr "Weiter"
+
+#: root/templates/root/overview_x.html:30
+msgid "Delete"
+msgstr "Löschen"
+
+#, python-format
+#~ msgid "The current time is %(time)s"
+#~ msgstr "Die aktuelle Zeit ist %(time)s"
