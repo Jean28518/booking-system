@@ -17,6 +17,16 @@ booking.int.de {
 }
 ```
 
+### How to reset the password for a user
+
+```bash
+docker exec -it booking-system_django_gunicorn_1 bash -l
+cd /app
+python manage.py changepassword myuser
+```
+
+
+
 ## How to develop
 
 ```bash
