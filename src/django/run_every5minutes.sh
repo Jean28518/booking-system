@@ -6,8 +6,8 @@ if [ -d "src" ]; then
 fi
 
 # if app directory exists change into app directory (inside docker container)
-if [ -d "app" ]; then
-    cd app
+if [ -d "/app" ]; then
+    cd /app
 fi
 
 # Enable virtual environment if it exists
