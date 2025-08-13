@@ -7,7 +7,7 @@ git clone https://github.com/Jean28518/booking-system.git
 cd booking-system
 vim docker-compose.yml
 # Change here the environment variables to your needs
-docker-compose up -d
+docker compose up -d
 # The first startup needs about 2 to 5 minutes.
 
 # Insert the following lines into your Caddyfile (if you use Caddy as reverse proxy)
@@ -17,6 +17,13 @@ booking.int.de {
 }
 ```
 
+## How to update
+
+```bash
+git pull
+docker compose up -d
+```
+
 ### How to reset the password for a user
 
 ```bash
@@ -24,8 +31,6 @@ docker exec -it booking-system_django_gunicorn_1 bash -l
 cd /app
 python manage.py changepassword myuser
 ```
-
-
 
 ## How to develop
 
