@@ -174,7 +174,7 @@ def create_ticket_from_recurring(request, guid):
             # Check if duration is bigger than the duration of the parent ticket
             if int(form.cleaned_data["duration"]) > parent_ticket.duration.seconds // 60:
                 return templates.message(request, _("The duration is too long. Please select a shorter duration."), "recurring_ticket", [guid])
-            new_ticket = Ticket(name=parent_ticket.name + ": " + form.cleaned_data["description"],
+            new_ticket = Ticket(name=form.cleaned_data["description"],
                                 first_available_date=datetime.date.today(),
                                 duration=datetime.timedelta(minutes=int(form.cleaned_data["duration"])),
                                 expiry=(datetime.date.today() + datetime.timedelta(days=14)),
