@@ -146,7 +146,7 @@ def recurring_ticket(request, guid):
         "element_url_key": "guid",
         "t_headings": [_("Name"), _("Duration"), _("Booked Date")],
         "t_keys": ["name", "duration", "current_date_ticket_user"],
-        "edit_url_name": "customer_change_date", 
+        "info_url_name": "ticket", 
         "delete_url_name": "delete_ticket",
         "hint": '<a href="{}" role="button">{}</a>'.format(reverse("create_ticket_from_recurring", args=[guid]), _("Create a new appointment")),
     })
