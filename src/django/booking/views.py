@@ -44,7 +44,7 @@ def index(request):
     booking.booking.delete_old_tickets()
     default_name = _("Ticket from") + " " + datetime.datetime.now().strftime("%d.%m.%Y %H:%M") + " " + _("APPENDIX_AFTER_TIME")
     start_date = datetime.date.today().strftime("%Y-%m-%d")
-    expiry_date = (datetime.date.today() + datetime.timedelta(days=14)).strftime("%Y-%m-%d")
+    expiry_date = (datetime.date.today() + datetime.timedelta(days=252)).strftime("%Y-%m-%d")
     return render(request, 'booking/index.html', {"start_date": start_date, "expiry_date": expiry_date, "default_name": default_name})
 
 @login_required()
