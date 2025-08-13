@@ -21,7 +21,7 @@ booking.int.de {
 
 ```bash
 git pull
-docker compose up -d
+docker compose up -d --force-recreate
 ```
 
 ### How to reset the password for a user
