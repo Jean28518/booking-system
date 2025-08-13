@@ -18,6 +18,8 @@ from django.utils.translation import gettext as _
 
 from django.contrib.auth.models import User
 
+from booking.utils import send_cancel_emails
+
 
 @login_required()
 def index(request):
@@ -286,6 +288,7 @@ def delete_ticket(request, guid):
     # If this is a recurring ticket, we delete the ticket but redirect to the recurring ticket view
     parent_guid = ticket.parent_ticket.guid
     booking.calendar.remove_booking(guid)
+    send_cancel_emails(ticket, customer_timezone=request.session.get("django_timezone", "Europe/Berlin"), send_hint=False)
     ticket.delete()
     return redirect("recurring_ticket", guid=parent_guid)
 
@@ -438,23 +441,7 @@ def customer_cancel_ticket(request, guid):
     current_datetime_ticket_user = convert_time_from_utc_to_local(current_datetime, ticket.assigned_user.profile.timezone)
     current_datetime_customer = convert_time_from_utc_to_local(current_datetime, request.session["django_timezone"])
     booking.calendar.remove_booking(guid)
-    assigned_user = ticket.assigned_user
-    send_mail(
-        _("Appointment") + ' "' + ticket.name + '" ' + _("canceled."),
-        _("The appointment on") + " " + current_datetime_ticket_user.strftime("%d.%m.%Y %H:%M") + ' ' + _("APPENDIX_AFTER_TIME") + ' ' + _("was canceled."),
-        settings.EMAIL_HOST_USER,
-        [assigned_user.email],
-        fail_silently=True,
-    )
-    ticket_description = booking.booking.get_ticket_description_for_customer(ticket)
-    if ticket.email_of_customer:
-        send_mail(
-            f'{ticket_description} ' + _("canceled. Date: ") + current_datetime_customer.strftime("%d.%m.%Y %H:%M") + ' ' + _("APPENDIX_AFTER_TIME"),
-            f'{ticket_description} ' + _("canceled. Date: ") + current_datetime_customer.strftime("%d.%m.%Y %H:%M") + ' ' + _("APPENDIX_AFTER_TIME") + f'.\n\n' + _("Hint: You can manage the appointment at any time via the following link") + f': {settings.BASE_URL + reverse("ticket_customer_view", args=[guid])}',
-            settings.EMAIL_HOST_USER,
-            [ticket.email_of_customer],
-            fail_silently=True,
-        )
+    send_cancel_emails(ticket, customer_timezone=request.session.get("django_timezone", "Europe/Berlin"), send_hint=True)
     return templates.message(request, _("Appointment canceled. If you want to book the appointment again, you will be redirected to the booking page."), "ticket_customer_view", [guid])
 
 def set_timezone(request):
