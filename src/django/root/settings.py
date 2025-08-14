@@ -29,6 +29,8 @@ DEBUG = os.environ.get("DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = [
     os.environ.get("HOST", "localhost"),
+    "127.0.0.1",
+    "[::1]",
 ]
 
 
