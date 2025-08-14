@@ -327,6 +327,10 @@ def cache_events(caldav_adress, username: str="", events: list=[]):
     events_cache[cache_key] = {"time": datetime.datetime.now(), "events": events}
 
 def get_all_caldav_events(caldav_adress, username: str=None, password: str=None):
+    if username is None:
+        username = ""
+    if password is None:
+        password = ""
     if get_cached_events(caldav_adress, username):
         return get_cached_events(caldav_adress, username)
     http = httplib2.Http()
