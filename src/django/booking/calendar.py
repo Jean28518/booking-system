@@ -292,7 +292,10 @@ def book_ticket(ticket_guid):
     end = ticket.current_date + ticket.duration
     caldav_uid = generate_guid()
     jitsi_link = booking.get_jitsi_link_for_ticket(ticket)
-    caldav.create_caldav_event(start, end, caldav_uid, ticket.name, calendar.url, calendar.username, calendar.password, jitsi_link)
+    ticket_name = ticket.name
+    if ticket.parent_ticket:
+        ticket_name = ticket.parent_ticket.name + ": " + ticket_name
+    caldav.create_caldav_event(start, end, caldav_uid, ticket_name, calendar.url, calendar.username, calendar.password, jitsi_link)
     ticket.caldav_event_uid = caldav_uid
     ticket.save()
 

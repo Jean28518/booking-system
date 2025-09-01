@@ -398,19 +398,18 @@ def select_slot(request, guid, date, start_time):
         meeting_link_description = ""
         if ticket.generate_jitsi_link:
             meeting_link_description = f"\n" + _("Link to the meeting") + f" (Jitsi): {booking.booking.get_jitsi_link_for_ticket(ticket)}"
+        private_ticket_name = ticket.name
+        if ticket.parent_ticket:
+            private_ticket_name = ticket.parent_ticket.name + ": " + private_ticket_name
         send_mail(
-            _("Appointment") + ' "' + ticket.name + '" ' + _("booked. Date: ") + current_datetime_ticket_user.strftime("%d.%m.%Y %H:%M") + ' ' + _("APPENDIX_AFTER_TIME"),
+            _("Appointment") + ' "' + private_ticket_name + '" ' + _("booked. Date: ") + current_datetime_ticket_user.strftime("%d.%m.%Y %H:%M") + ' ' + _("APPENDIX_AFTER_TIME"),
             _("The appointment was booked on") + " " + current_datetime_ticket_user.strftime("%d.%m.%Y %H:%M") + ' ' + _("APPENDIX_AFTER_TIME") + meeting_link_description,
             settings.EMAIL_HOST_USER,
             [assigned_user.email],
             fail_silently=True,
         )
         ticket_description = booking.booking.get_ticket_description_for_customer(ticket)
-        # Add the description of the customer which he could set in tickets which are created from a recurring ticket to the ical event
-        if ticket.parent_ticket:
-            attachment_ics = booking.calendar.get_ical_string_for_ticket(ticket.guid, ": " + ticket.name)
-        else:
-            attachment_ics = booking.calendar.get_ical_string_for_ticket(ticket.guid) 
+        attachment_ics = booking.calendar.get_ical_string_for_ticket(ticket.guid) 
         if ticket.email_of_customer:
             email = EmailMessage(
                 f'{ticket_description} ' + _("booked. Date: ") + current_datetime_customer.strftime("%d.%m.%Y %H:%M") + ' ' + _("APPENDIX_AFTER_TIME"),
