@@ -29,7 +29,7 @@ class TicketForm(forms.ModelForm):
 
     class Meta:
         model = Ticket
-        fields = ['name', 'first_available_date', 'duration', 'expiry', 'generate_jitsi_link', 'recurring']
+        fields = ['name', 'first_available_date', 'duration', 'expiry', 'generate_jitsi_link', 'recurring', 'parent_ticket']
         labels = {
             'name': _('Name'),
             'first_available_date': _('First available date'),
@@ -37,6 +37,7 @@ class TicketForm(forms.ModelForm):
             'expiry': _('Expiry date'),
             'generate_jitsi_link': _('Generate jitsi link'),
             'recurring': _('Recurring (this ticket will allow booking multiple appointments)'),
+            'parent_ticket': _('Parent ticket'),
         }
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
@@ -45,6 +46,7 @@ class TicketForm(forms.ModelForm):
             'expiry': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'aria-label': "Date"}, format='%Y-%m-%d'),
             'generate_jitsi_link': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'recurring': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'parent_ticket': forms.Select(attrs={'class': 'form-select'}),
         }
 
 
