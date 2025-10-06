@@ -404,7 +404,7 @@ def select_slot(request, guid, date, start_time):
         send_mail(
             _("Appointment") + ' "' + private_ticket_name + '" ' + _("booked. Date: ") + current_datetime_ticket_user.strftime("%d.%m.%Y %H:%M") + ' ' + _("APPENDIX_AFTER_TIME"),
             _("The appointment was booked on") + " " + current_datetime_ticket_user.strftime("%d.%m.%Y %H:%M") + ' ' + _("APPENDIX_AFTER_TIME") + meeting_link_description,
-            settings.EMAIL_HOST_USER,
+            settings.EMAIL_HOST_ADDRESS,
             [assigned_user.email],
             fail_silently=True,
         )
@@ -414,7 +414,7 @@ def select_slot(request, guid, date, start_time):
             email = EmailMessage(
                 f'{ticket_description} ' + _("booked. Date: ") + current_datetime_customer.strftime("%d.%m.%Y %H:%M") + ' ' + _("APPENDIX_AFTER_TIME"),
                 f'{ticket_description} ' + _("booked. Date: ") + current_datetime_customer.strftime("%d.%m.%Y %H:%M") + ' ' + _("APPENDIX_AFTER_TIME") + f' ' + _("with a duration of") + f' {duration_display} ' + _("minutes") + f'.{meeting_link_description}\n\n' + _("Hint: You can manage the appointment at any time via the following link") + f': {settings.BASE_URL + reverse("ticket_customer_view", args=[guid])}',
-                settings.EMAIL_HOST_USER,
+                settings.EMAIL_HOST_ADDRESS,
                 [ticket.email_of_customer],
             )
             email.attach("event.ics", attachment_ics, "text/calendar")

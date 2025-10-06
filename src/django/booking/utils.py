@@ -24,7 +24,7 @@ def send_cancel_emails(ticket, customer_timezone="Europe/Berlin", send_hint=True
     send_mail(
         _("Appointment") + ' "' + private_ticket_name + '" ' + _("canceled."),
         _("The appointment on") + " " + current_datetime_ticket_user.strftime("%d.%m.%Y %H:%M") + ' ' + _("APPENDIX_AFTER_TIME") + ' ' + _("was canceled."),
-        settings.EMAIL_HOST_USER,
+        settings.EMAIL_HOST_ADDRESS,
         [assigned_user.email],
         fail_silently=True,
     )
@@ -38,7 +38,7 @@ def send_cancel_emails(ticket, customer_timezone="Europe/Berlin", send_hint=True
         send_mail(
             f'{ticket_description} ' + _("canceled. Date: ") + current_datetime_customer.strftime("%d.%m.%Y %H:%M") + ' ' + _("APPENDIX_AFTER_TIME"),
             f'{ticket_description} ' + _("canceled. Date: ") + current_datetime_customer.strftime("%d.%m.%Y %H:%M") + ' ' + _("APPENDIX_AFTER_TIME") + f'.\n\n' + hint,
-            settings.EMAIL_HOST_USER,
+            settings.EMAIL_HOST_ADDRESS,
             [ticket.email_of_customer],
             fail_silently=True,
         )

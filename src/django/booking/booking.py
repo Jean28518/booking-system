@@ -76,7 +76,7 @@ def send_reminder_mails():
             send_mail(
                 _("Reminder: Your appointment with") + " " + ticket.assigned_user.first_name + " " + ticket.assigned_user.last_name + " " + _("is tomorrow at") + " "  + ticket_time.strftime("%H:%M") + _("APPENDIX_AFTER_TIME") + ".",
                 _("You have an appointment with") + " " + ticket.assigned_user.first_name + " " + ticket.assigned_user.last_name + " " + _("tomorrow at") + " " + ticket_time.strftime("%H:%M") + _("APPENDIX_AFTER_TIME") + "." + "\n" + _("If you want to change or cancel the appointment, please visit the following link") + ":" + " " + settings.BASE_URL + reverse("ticket_customer_view", args=[guid]), 
-                settings.EMAIL_HOST_USER,
+                settings.EMAIL_HOST_ADDRESS,
                 [ticket.email_of_customer],
                 fail_silently=False
             )
