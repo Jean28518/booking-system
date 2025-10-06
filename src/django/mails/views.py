@@ -43,7 +43,7 @@ def send_test_email(request):
         send_mail(
             _('Test Email'),
             _('This is a test email'),
-            cfg.get_value("email_user", ""),
+            cfg.get_value("email_address", ""),
             [user.email],
             fail_silently=False,
         )
