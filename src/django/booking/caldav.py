@@ -398,7 +398,7 @@ def clear_caldav_cache_for_user(user):
 
 
 def generate_ics_filename(caldav_adress: str):
-    caldav_adress_filename = caldav_adress.replace("/", "_").replace(":", "_") 
+    caldav_adress_filename = "/tmp/" + caldav_adress.replace("/", "_").replace(":", "_") 
     return f"{caldav_adress_filename}.ics"
 
 
