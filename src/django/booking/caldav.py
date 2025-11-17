@@ -465,8 +465,12 @@ def download_ics_file(caldav_adress, username: str=None, password: str=None):
         print(f"Error retrieving .ics file: {response.status}")
   
 
-# Loads all events from the cached ics file or downloads it if not present
-def get_all_caldav_events(caldav_adress, username: str=None, password: str=None):
+# Loads all events from the cached ics file or downloads it if not present and also caches the parsed events
+def get_all_caldav_events(caldav_adress, username: str=None, password: str=None, no_cache: bool=False):
+    # Check cache first
+    cached_events = get_cached_events(caldav_adress, username)
+    if cached_events is not None and not no_cache:
+        return cached_events
     ics_filename = generate_ics_filename(caldav_adress)
     if not os.path.exists(ics_filename):
         download_ics_file(caldav_adress, username, password)
