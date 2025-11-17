@@ -6,6 +6,7 @@ from urllib.parse import unquote
 from booking.timezones import common_timezones_array_of_dicts, convert_time_from_local_to_utc
 import pytz
 import cfg.cfg as cfg
+import os
 
 def day_to_number(day: str):
     if day == "MO":
@@ -326,7 +327,14 @@ def cache_events(caldav_adress, username: str="", events: list=[]):
     cache_key = caldav_adress + username
     events_cache[cache_key] = {"time": datetime.datetime.now(), "events": events}
 
-def get_all_caldav_events(caldav_adress, username: str=None, password: str=None):
+
+def generate_ics_filename(caldav_adress: str):
+    caldav_adress_filename = caldav_adress.replace("/", "_").replace(":", "_") 
+    return f"{caldav_adress_filename}.ics"
+
+
+# Called every 5 minutes to download the ics file and cache it (called by calendar.retrieve_all_caldav_calendars_for_all_users)
+def download_ics_file(caldav_adress, username: str=None, password: str=None):
     if username is None:
         username = ""
     if password is None:
@@ -381,15 +389,29 @@ def get_all_caldav_events(caldav_adress, username: str=None, password: str=None)
     # Check for successful response
     if response.status == 207:
         content = content.decode("utf-8")
-        # Write content to file
-        with open("calendar.txt", "w") as file:
+        caldav_adress_filename = generate_ics_filename(caldav_adress)
+        with open(caldav_adress_filename, "w") as file:
             file.write(content)
-        events = get_events_from_response(content)
-        cache_events(caldav_adress, username, events)
-        return events
     else:
-        print(f"Error retrieving events: {response.status}")
+        print(f"Error retrieving .ics file: {response.status}")
+  
+
+# Loads all events from the cached ics file or downloads it if not present
+def get_all_caldav_events(caldav_adress, username: str=None, password: str=None):
+    ics_filename = generate_ics_filename(caldav_adress)
+    if not os.path.exists(ics_filename):
+        download_ics_file(caldav_adress, username, password)
+
+    if os.path.exists(ics_filename):
+        with open(ics_filename, "r") as file:
+            content = file.read()  
+    else:
+        print("ICS file does not exist: " + ics_filename)
         return []
+    
+    events = get_events_from_response(content)
+    cache_events(caldav_adress, username, events)
+    return events
 
 
 def create_caldav_event(start: datetime.datetime, end: datetime.datetime, uid: str,  summary: str, caldav_address: str, username: str=None, password: str=None, location: str = ""):

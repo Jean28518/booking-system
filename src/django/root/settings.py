@@ -159,4 +159,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 BASE_URL = os.environ.get("HOST", "http://localhost:8000")
 if not BASE_URL.startswith("http://"):
-    BASE_URL = "https://" + BASE_URL 
+    BASE_URL = "https://" + BASE_URL

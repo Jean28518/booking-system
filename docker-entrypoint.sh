@@ -18,11 +18,10 @@ locale-gen
 
 
 # Add cronjob if it does not exist
-if ! crontab -l | grep -q "*/5 * * * * /app/run_every5minutes.sh"; then
-    echo "*/5 * * * * /app/run_every5minutes.sh" | crontab -
+if ! crontab -l | grep -q "*/5 * * * * bash /app/run_every5minutes.sh"; then
+    echo "*/5 * * * * bash /app/run_every5minutes.sh" | crontab -
 fi
 chmod +x /app/run_every5minutes.sh
-
 
 pip install --upgrade pip
 

@@ -38,6 +38,9 @@ def delete_old_tickets():
 
 
 def get_jitsi_link_for_ticket(ticket: Ticket):
+    if ticket.parent_ticket:
+        return get_jitsi_link_for_ticket(ticket.parent_ticket)
+
     if not ticket.generate_jitsi_link:
         return ""
     
