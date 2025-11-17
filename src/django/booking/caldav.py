@@ -408,7 +408,7 @@ def download_ics_file(caldav_adress, username: str=None, password: str=None, no_
         username = ""
     if password is None:
         password = ""
-    if get_cached_events(caldav_adress, username):
+    if get_cached_events(caldav_adress, username) is not None and not no_cache:
         return get_cached_events(caldav_adress, username)
     http = httplib2.Http()
     if cfg.get_value("skip_ssl_check", False):
