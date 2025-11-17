@@ -403,7 +403,7 @@ def generate_ics_filename(caldav_adress: str):
 
 
 # Called every 5 minutes to download the ics file and cache it (called by calendar.retrieve_all_caldav_calendars_for_all_users)
-def download_ics_file(caldav_adress, username: str=None, password: str=None):
+def download_ics_file(caldav_adress, username: str=None, password: str=None, no_cache: bool=False):
     if username is None:
         username = ""
     if password is None:
