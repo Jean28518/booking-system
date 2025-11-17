@@ -444,9 +444,18 @@ def customer_cancel_ticket(request, guid):
     current_datetime = ticket.current_date
     current_datetime_ticket_user = convert_time_from_utc_to_local(current_datetime, ticket.assigned_user.profile.timezone)
     current_datetime_customer = convert_time_from_utc_to_local(current_datetime, request.session["django_timezone"])
-    booking.calendar.remove_booking(guid)
-    send_cancel_emails(ticket, customer_timezone=request.session.get("django_timezone", "Europe/Berlin"), send_hint=True)
-    return templates.message(request, _("Appointment canceled. If you want to book the appointment again, you will be redirected to the booking page."), "ticket_customer_view", [guid])
+
+    if request.method == "POST":
+        booking.calendar.remove_booking(guid)
+        send_cancel_emails(ticket, customer_timezone=request.session.get("django_timezone", "Europe/Berlin"), send_hint=True)
+        return templates.message(request, _("Appointment canceled. If you want to book the appointment again, you will be redirected to the booking page."), "ticket_customer_view", [guid])
+
+    return render(request, "templates/confirm.html", {
+        "title": _("Cancel Appointment"),
+        "message": _("Are you sure you want to cancel the appointment on") + " " + current_datetime_customer.strftime("%d.%m.%Y %H:%M") + ' ' + _("APPENDIX_AFTER_TIME") + "?",
+        "url_cancel": reverse("customer_cancel_ticket", args=[guid]),
+        "back_url": reverse("ticket_customer_view", args=[guid]),
+    })
 
 def set_timezone(request):
     if request.method == "POST":
