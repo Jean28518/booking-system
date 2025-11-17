@@ -318,9 +318,10 @@ events_cache = {}
 def get_cached_events(caldav_adress, username: str=""):
     filename = generate_ics_filename(caldav_adress) + "_cache.json"
     if os.path.exists(filename):
+        # Get the modification time of the file
+        cache_time = datetime.datetime.fromtimestamp(os.path.getmtime(filename))
         with open(filename, "r") as file:
             data = json.load(file)
-            cache_time = datetime.datetime.fromisoformat(data["time"])
             if (datetime.datetime.now() - cache_time).seconds < 300:
                 return data["events"]
             else:
@@ -331,7 +332,6 @@ def cache_events(caldav_adress, username: str="", events: list=[]):
     filename = generate_ics_filename(caldav_adress) + "_cache.json"
     with open(filename, "w") as file:
         json.dump({
-            "time": datetime.datetime.now().isoformat(),
             "events": events
         }, file)
     # cache_key = caldav_adress + username
