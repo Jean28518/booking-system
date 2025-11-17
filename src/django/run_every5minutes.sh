@@ -8,6 +8,8 @@ if [ $(pgrep -fc run_every5minutes.sh) -gt 2 ]; then
   exit 1
 fi
 
+echo "Run every 5 minutes script started at $(date)" > /var/log/run_every5minutes.log 2>&1
+
 # If src directory exists change into src/django directory
 if [ -d "src" ]; then
     cd src/django
