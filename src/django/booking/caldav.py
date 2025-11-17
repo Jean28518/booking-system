@@ -314,33 +314,75 @@ def get_events_from_response(response : str):
 
 events_cache = {}
 
-# If the cached object is older than 5 minutes, we return None and remove the object from the cache
-def get_cached_events(caldav_adress, username: str=""):
+def _serialize_events_obj(obj):
+    """
+    Custom JSON serializer for datetime objects.
+    """
+    if isinstance(obj, datetime.datetime):
+        return obj.isoformat()
+    # Let the JSON encoder raise a TypeError for other unsupported types.
+    # This avoids the 'str(obj)' bug.
+    raise TypeError(f"Object of type {obj.__class__.__name__} is not JSON serializable")
+
+def unserialize_events_obj(dct):
+    """
+    Custom JSON object_hook to deserialize datetime strings.
+    Note: This naive implementation may incorrectly parse strings that look like datetimes but aren't intended to be.
+    e.g., {"summary": "2025-01-01T00:00:00"} -> {"summary": datetime.datetime(...)}
+    A better long-term solution is to check keys or use a custom type format.
+    """
+    for key, value in dct.items():
+        if isinstance(value, str):
+            try:
+                # Attempt to parse *only* strings
+                dct[key] = datetime.datetime.fromisoformat(value)
+            except (ValueError, TypeError):
+                # ValueError: not an ISO string
+                # TypeError: e.g., fromisoformat() received a non-string
+                pass  # Keep the original string value
+    return dct
+
+def get_cached_events(caldav_adress, username: str="", cache_duration_seconds: int = 300):
     filename = generate_ics_filename(caldav_adress) + "_cache.json"
-    if os.path.exists(filename):
-        # Get the modification time of the file
-        cache_time = datetime.datetime.fromtimestamp(os.path.getmtime(filename))
-        try:
-            with open(filename, "r") as file:
-                data = json.load(file)
-                if (datetime.datetime.now() - cache_time).seconds < 300:
-                    return data["events"]
-                else:
-                    os.remove(filename)
-        except:
+    
+    if not os.path.exists(filename):
+        return None
+
+    try:
+        # 1. Check modification time FIRST
+        cache_mtime = os.path.getmtime(filename)
+        cache_time = datetime.datetime.fromtimestamp(cache_mtime)
+        
+        # 2. Use .total_seconds() for the check
+        if (datetime.datetime.now() - cache_time).total_seconds() >= cache_duration_seconds:
+            # Cache is expired, remove it and return
             os.remove(filename)
-    return None
+            return None
+            
+        # 3. Cache is fresh, *now* we read and parse it
+        with open(filename, "r") as file:
+            data = json.load(file, object_hook=unserialize_events_obj)
+            return data.get("events") # Use .get() for safety
+
+    except (FileNotFoundError, json.JSONDecodeError, PermissionError, OSError):
+        # Catch specific errors.
+        # If file is corrupt, missing (race condition), or unreadable,
+        # delete it (if it still exists) and return None.
+        if os.path.exists(filename):
+            os.remove(filename)
+        return None
 
 def cache_events(caldav_adress, username: str="", events: list=[]):
     filename = generate_ics_filename(caldav_adress) + "_cache.json"
-    with open(filename, "w") as file:
-        json.dump({
-            "events": events
-        }, file)
-    # cache_key = caldav_adress + username
+    data_to_cache = {"events": events}
     
-    # events_cache[cache_key] = {"time": datetime.datetime.now(), "events": events}
-
+    try:
+        with open(filename, "w") as file:
+            # 4. Use json.dump() (no 's') to write to the file
+            json.dump(data_to_cache, file, default=_serialize_events_obj)
+    except (PermissionError, OSError) as e:
+        # Handle cases where we can't write the cache file
+        print(f"Warning: Could not write cache file {filename}. Error: {e}")
 
 def clear_caldav_cache_for_user(user):
     """Clears the caldav cache for all calendars of the given user."""
