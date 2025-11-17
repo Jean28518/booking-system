@@ -7,6 +7,7 @@ from booking.timezones import common_timezones_array_of_dicts, convert_time_from
 import pytz
 import cfg.cfg as cfg
 import os
+import json
 
 def day_to_number(day: str):
     if day == "MO":
@@ -313,19 +314,42 @@ def get_events_from_response(response : str):
 
 events_cache = {}
 
-# If the cached object is older than 1 minute, we return None and remove the object from the cache
+# If the cached object is older than 5 minutes, we return None and remove the object from the cache
 def get_cached_events(caldav_adress, username: str=""):
-    cache_key = caldav_adress + username
-    if cache_key in events_cache:
-        if (datetime.datetime.now() - events_cache[cache_key]["time"]).seconds < 60:
-            return events_cache[cache_key]["events"]
-        else:
-            del events_cache[cache_key]
+    filename = generate_ics_filename(caldav_adress) + "_cache.json"
+    if os.path.exists(filename):
+        with open(filename, "r") as file:
+            data = json.load(file)
+            cache_time = datetime.datetime.fromisoformat(data["time"])
+            if (datetime.datetime.now() - cache_time).seconds < 300:
+                return data["events"]
+            else:
+                os.remove(filename)
     return None
 
 def cache_events(caldav_adress, username: str="", events: list=[]):
-    cache_key = caldav_adress + username
-    events_cache[cache_key] = {"time": datetime.datetime.now(), "events": events}
+    filename = generate_ics_filename(caldav_adress) + "_cache.json"
+    with open(filename, "w") as file:
+        json.dump({
+            "time": datetime.datetime.now().isoformat(),
+            "events": events
+        }, file)
+    # cache_key = caldav_adress + username
+    
+    # events_cache[cache_key] = {"time": datetime.datetime.now(), "events": events}
+
+
+def clear_caldav_cache_for_user(user):
+    """Clears the caldav cache for all calendars of the given user."""
+    from booking.models import Calendar
+    calendars = Calendar.objects.filter(user=user)
+    for calendar in calendars:
+        filename = generate_ics_filename(calendar.url) + "_cache.json"
+        if os.path.exists(filename):
+            os.remove(filename)
+        ics_filename = generate_ics_filename(calendar.url)
+        if os.path.exists(ics_filename):
+            os.remove(ics_filename)
 
 
 def generate_ics_filename(caldav_adress: str):

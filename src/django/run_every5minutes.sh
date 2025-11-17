@@ -32,4 +32,4 @@ echo "Running every 5 minutes scripts..."
 # Run django shell with following commands
 python manage.py shell -c "import booking.booking; booking.booking.send_reminder_mails()" >> /var/log/run_every5minutes.log 2>&1
 
-python manage.py shell -c "import booking.calendar; booking.calendar.retrieve_all_caldav_calendars_for_all_users()" >> /var/log/run_every5minutes.log 2>&1
+python manage.py shell -c "import booking.calendar; booking.calendar.retrieve_all_caldav_calendars_for_all_users_and_cache_events()" >> /var/log/run_every5minutes.log 2>&1

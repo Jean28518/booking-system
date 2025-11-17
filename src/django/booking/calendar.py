@@ -311,8 +311,10 @@ def get_ical_string_for_ticket(ticket_guid, append_description = ""):
     return caldav.get_ical_string_for_event(start, end, summary, jitsi_link, ticket_link)
 
 
-def retrieve_all_caldav_calendars_for_all_users():
+def retrieve_all_caldav_calendars_for_all_users_and_cache_events():
     """Retrieves all caldav calendars for all users and caches the events."""
     all_calendars = Calendar.objects.all()
     for calendar in all_calendars:
         caldav.download_ics_file(calendar.url, calendar.username, calendar.password)
+        events = caldav.get_all_caldav_events(calendar.url, calendar.username, calendar.password)
+        caldav.cache_events(calendar.url, calendar.username, events)

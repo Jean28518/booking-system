@@ -391,6 +391,11 @@ def select_slot(request, guid, date, start_time):
         if ticket.email_of_customer and ticket.parent_ticket:
             ticket.parent_ticket.email_of_customer = ticket.email_of_customer
         booking.calendar.book_ticket(guid)
+        # Clear the cache of all user's calendars to reflect the new booking
+        booking.calendar.clear_caldav_cache_for_user(ticket.assigned_user)
+        # Start a new thread to retrieve all caldav calendars for all users and cache events
+        import threading
+        threading.Thread(target=booking.calendar.retrieve_all_caldav_calendars_for_all_users_and_cache_events).start()
         assigned_user = ticket.assigned_user
         current_datetime = ticket.current_date
         current_datetime_ticket_user = datetime.datetime.combine(date_ticket_user, start_time_ticket_user)
