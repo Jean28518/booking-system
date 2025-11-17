@@ -450,7 +450,7 @@ def customer_cancel_ticket(request, guid):
         send_cancel_emails(ticket, customer_timezone=request.session.get("django_timezone", "Europe/Berlin"), send_hint=True)
         return templates.message(request, _("Appointment canceled. If you want to book the appointment again, you will be redirected to the booking page."), "ticket_customer_view", [guid])
 
-    return render(request, "templates/confirm.html", {
+    return render(request, "root/confirm.html", {
         "title": _("Cancel Appointment"),
         "message": _("Are you sure you want to cancel the appointment on") + " " + current_datetime_customer.strftime("%d.%m.%Y %H:%M") + ' ' + _("APPENDIX_AFTER_TIME") + "?",
         "url_cancel": reverse("customer_cancel_ticket", args=[guid]),
