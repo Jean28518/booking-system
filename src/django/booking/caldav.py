@@ -420,6 +420,7 @@ def download_ics_file(caldav_adress, username: str=None, password: str=None):
         if username and password:
             # Add Basic Authentication header
             headers["Authorization"] = "Basic " + base64.b64encode(f"{username}:{password}".encode("utf-8")).decode("utf-8")
+        http.timeout = 30
         response, ics_content = http.request(caldav_adress, "GET", headers=headers)
         if response.status == 200:
             return get_events_from_response(ics_content.decode("utf-8"))

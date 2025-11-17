@@ -315,6 +315,9 @@ def retrieve_all_caldav_calendars_for_all_users_and_cache_events():
     """Retrieves all caldav calendars for all users and caches the events."""
     all_calendars = Calendar.objects.all()
     for calendar in all_calendars:
+        print("Retrieving calendar for user: " + calendar.assigned_user.username)
         caldav.download_ics_file(calendar.url, calendar.username, calendar.password)
+        print("Parsing events...")
         events = caldav.get_all_caldav_events(calendar.url, calendar.username, calendar.password, no_cache=True)
+        print("Caching events...")
         caldav.cache_events(calendar.url, calendar.username, events)
