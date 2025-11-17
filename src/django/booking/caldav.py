@@ -320,12 +320,15 @@ def get_cached_events(caldav_adress, username: str=""):
     if os.path.exists(filename):
         # Get the modification time of the file
         cache_time = datetime.datetime.fromtimestamp(os.path.getmtime(filename))
-        with open(filename, "r") as file:
-            data = json.load(file)
-            if (datetime.datetime.now() - cache_time).seconds < 300:
-                return data["events"]
-            else:
-                os.remove(filename)
+        try:
+            with open(filename, "r") as file:
+                data = json.load(file)
+                if (datetime.datetime.now() - cache_time).seconds < 300:
+                    return data["events"]
+                else:
+                    os.remove(filename)
+        except:
+            os.remove(filename)
     return None
 
 def cache_events(caldav_adress, username: str="", events: list=[]):
