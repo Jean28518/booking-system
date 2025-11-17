@@ -387,7 +387,7 @@ def cache_events(caldav_adress, username: str="", events: list=[]):
 def clear_caldav_cache_for_user(user):
     """Clears the caldav cache for all calendars of the given user."""
     from booking.models import Calendar
-    calendars = Calendar.objects.filter(user=user)
+    calendars = Calendar.objects.filter(assigned_user=user)
     for calendar in calendars:
         filename = generate_ics_filename(calendar.url) + "_cache.json"
         if os.path.exists(filename):
