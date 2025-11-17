@@ -453,8 +453,7 @@ def customer_cancel_ticket(request, guid):
     return render(request, "root/confirm.html", {
         "title": _("Cancel Appointment"),
         "message": _("Are you sure you want to cancel the appointment on") + " " + current_datetime_customer.strftime("%d.%m.%Y %H:%M") + ' ' + _("APPENDIX_AFTER_TIME") + "?",
-        "url_cancel": reverse("customer_cancel_ticket", args=[guid]),
-        "back_url": reverse("ticket_customer_view", args=[guid]),
+        "url_cancel": reverse("ticket_customer_view", args=[guid]),
     })
 
 def set_timezone(request):
