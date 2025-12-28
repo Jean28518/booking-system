@@ -28,6 +28,7 @@ class Ticket(models.Model):
     email_of_customer = models.EmailField(max_length=200, null=True, blank=True)
     caldav_event_uid = models.CharField(max_length=200, null=True, blank=True)
     guid = models.CharField(max_length=200, null=True, blank=True)
+    timezone_of_customer = models.CharField(max_length=100, null=True, blank=True)
     parent_ticket = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
     """This ticket is then owned by a recurring ticket."""
     recurring = models.BooleanField(default=False)

@@ -75,6 +75,18 @@ def send_reminder_mails():
             guid = ticket.guid
             print("Sending reminder mail to: " + ticket.email_of_customer)
             ticket_time = ticket.current_date.time()
+            # Translate to the timezone of the customer if available (the default is Europe/Berlin)
+            if not ticket.timezone_of_customer:
+                ticket.timezone_of_customer = "Europe/Berlin"
+            if ticket.timezone_of_customer:
+                try:
+                    import pytz
+                    from django.utils import timezone
+                    customer_tz = pytz.timezone(ticket.timezone_of_customer)
+                    ticket_time = timezone.localtime(ticket.current_date, customer_tz).time()
+                except Exception as e:
+                    print("Error translating time to customer's timezone: " + str(e))
+
             # Send mail
             send_mail(
                 _("Reminder: Your appointment with") + " " + ticket.assigned_user.first_name + " " + ticket.assigned_user.last_name + " " + _("is tomorrow at") + " "  + ticket_time.strftime("%H:%M") + _("APPENDIX_AFTER_TIME") + ".",

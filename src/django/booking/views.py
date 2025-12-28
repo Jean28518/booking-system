@@ -387,6 +387,7 @@ def select_slot(request, guid, date, start_time):
         
         ticket.current_date = datetime.datetime.combine(date, start_time)
         ticket.email_of_customer = request.POST.get("email", "")
+        ticket.timezone_of_customer = request.session["django_timezone"]
         ticket.save()
         if ticket.email_of_customer and ticket.parent_ticket:
             ticket.parent_ticket.email_of_customer = ticket.email_of_customer
