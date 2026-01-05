@@ -51,3 +51,4 @@ class BookingSettings(models.Model):
     sunday = models.BooleanField(default=False)
     jitsi_server = models.URLField(max_length=200, null=True, blank=True)
     maximum_future_booking_time = models.IntegerField(default=42)
+    invitation_text = models.CharField(max_length=5000, null=True, blank=True, default="", help_text="This text will be generated for easy copy-pasting into the invitation email. You can use #BOOKING_LINK# and #TICKET_NAME# as placeholders.")

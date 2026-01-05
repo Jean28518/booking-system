@@ -22,6 +22,15 @@
 
 <br>
 <br>
+
+    {% if invitation_text %}
+    <strong>{%translate "Invitation text for email" %}:</strong>
+    <code id="invitation_text">{{ invitation_text }}</code>
+    <small id="message_invitation">{%translate "Click on the text to copy in the clipboard" %}</small>
+    {% endif %}
+
+<br>
+<br>
 <br>
 
 <a href="{% url "index" %}" role="button">{%translate "Back to home" %}</a>
@@ -42,6 +51,21 @@ document.getElementById('link').addEventListener('click', function(e) {
     document.body.removeChild(input);
     document.getElementById('message').textContent = '{%translate "Link was copied into clipboard" %}!';
 });
+
+{% if invitation_text %}
+document.getElementById('invitation_text').style.cursor = 'pointer';
+document.getElementById('invitation_text').addEventListener('click', function(e) {
+    e.preventDefault();
+    var text = this.textContent;
+    var input = document.createElement('input');
+    input.value = text;
+    document.body.appendChild(input);
+    input.select();
+    document.execCommand('copy');
+    document.body.removeChild(input);
+    document.getElementById('message_invitation').textContent = '{%translate "Invitation text was copied into clipboard" %}!';
+});
+{% endif %}
 </script>
 
 {% endblock %}

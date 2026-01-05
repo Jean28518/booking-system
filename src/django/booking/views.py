@@ -41,7 +41,10 @@ def index(request):
         ticket = Ticket(name=name, first_available_date=start_date, duration=duration, expiry=expiry_date, generate_jitsi_link=generate_jitsi_link, assigned_user=request.user, guid=guid, recurring=recurring)
         ticket.save()
         share_url = settings.BASE_URL + reverse("ticket_customer_view", args=[ticket.guid])
-        return render(request, "booking/ticket_created.html", {"ticket": ticket, "share_url": share_url})
+        booking_settings = booking.booking.get_booking_settings_for_user(request.user)
+        if booking_settings.invitation_text:
+            invitation_text = booking_settings.invitation_text.replace("#BOOKING_LINK#", share_url).replace("#TICKET_NAME#", ticket.name)
+        return render(request, "booking/ticket_created.html", {"ticket": ticket, "share_url": share_url, "invitation_text": invitation_text})
 
     booking.booking.delete_old_tickets()
     default_name = _("Ticket from") + " " + datetime.datetime.now().strftime("%d.%m.%Y %H:%M") + " " + _("APPENDIX_AFTER_TIME")
