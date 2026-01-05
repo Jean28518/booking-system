@@ -53,7 +53,7 @@ class TicketForm(forms.ModelForm):
 class BookingSettingsForm(forms.ModelForm):
     class Meta:
         model = BookingSettings
-        fields = ['earliest_booking_time', 'latest_booking_end', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday', 'jitsi_server', 'maximum_future_booking_time']
+        fields = ['earliest_booking_time', 'latest_booking_end', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday', 'jitsi_server', 'maximum_future_booking_time', 'invitation_text']
         labels = {
             'earliest_booking_time': _('Earliest booking time'),
             'latest_booking_end': _('Latest booking end (when do you finish work?)'),
@@ -79,6 +79,7 @@ class BookingSettingsForm(forms.ModelForm):
             'sunday': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'jitsi_server': forms.URLInput(attrs={'class': 'form-control'}),
             'maximum_future_booking_time': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
+            'invitation_text': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
         }
 
 
