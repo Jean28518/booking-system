@@ -292,8 +292,10 @@ def delete_ticket(request, guid):
         return redirect("tickets")
     # If this is a recurring ticket, we delete the ticket but redirect to the recurring ticket view
     parent_guid = ticket.parent_ticket.guid
-    booking.calendar.remove_booking(guid)
-    send_cancel_emails(ticket, customer_timezone=request.session.get("django_timezone", "Europe/Berlin"), send_hint=False)
+    # Cancel the appointment if it is booked
+    if ticket.current_date:
+        booking.calendar.remove_booking(guid)
+        send_cancel_emails(ticket, customer_timezone=request.session.get("django_timezone", "Europe/Berlin"), send_hint=False)
     ticket.delete()
     return redirect("recurring_ticket", guid=parent_guid)
 
