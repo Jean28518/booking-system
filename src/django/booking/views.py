@@ -43,7 +43,9 @@ def index(request):
         share_url = settings.BASE_URL + reverse("ticket_customer_view", args=[ticket.guid])
         booking_settings = booking.booking.get_booking_settings_for_user(request.user)
         if booking_settings.invitation_text:
-            invitation_text = booking_settings.invitation_text.replace("#BOOKING_LINK#", share_url).replace("#TICKET_NAME#", ticket.name)
+            invitation_text = booking_settings.invitation_text.replace("#BOOKING_LINK#", share_url).replace("#TICKET_NAME#", ticket.name).replace("\n", "<br>")
+        else:
+            invitation_text = ""
         return render(request, "booking/ticket_created.html", {"ticket": ticket, "share_url": share_url, "invitation_text": invitation_text})
 
     booking.booking.delete_old_tickets()
