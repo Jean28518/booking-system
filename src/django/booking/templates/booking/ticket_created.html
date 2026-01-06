@@ -55,15 +55,14 @@ document.getElementById('link').addEventListener('click', function(e) {
 {% if invitation_text %}
 document.getElementById('invitation_text').style.cursor = 'pointer';
 document.getElementById('invitation_text').addEventListener('click', function(e) {
-    e.preventDefault();
-    var text = this.textContent;
-    var input = document.createElement('input');
-    input.value = text;
-    document.body.appendChild(input);
-    input.select();
-    document.execCommand('copy');
-    document.body.removeChild(input);
-    document.getElementById('message_invitation').textContent = '{%translate "Invitation text was copied into clipboard" %}!';
+    // Get textContent (preserves newlines because of your white-space: pre CSS)
+    const text = document.getElementById('invitation_text').textContent;
+    
+    navigator.clipboard.writeText(text).then(() => {
+        document.getElementById('message_invitation').textContent = '{%translate "Invitation text was copied into clipboard" %}!';
+    }).catch(err => {
+        console.error('Failed to copy: ', err);
+    });
 });
 {% endif %}
 </script>
