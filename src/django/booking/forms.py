@@ -87,4 +87,4 @@ class TicketCustomerForm(forms.Form):
     description = forms.CharField(label=_('Description'), required=True)
     generate_jitsi_link = forms.BooleanField(label=_('Create Jitsi link'), required=False, widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
     # Selection field for the duration of the appointment (15 minutes, 30 minutes, 1 hour, 1.5 hours, 2 hours, 3 hours, 4 hours, 5 hours, 6 hours, 7 hours, 8 hours)
-    duration = forms.ChoiceField(label=_('Duration') + " (" + _("minutes") + ")", choices=[(15, '15'), (30, '30'), (45, '30'), (60, '60'), (90, '90'), (120, '120'), (180, '180'), (240, '240'), (300, '300'), (360, '360'), (420, '420'), (480, '480')], widget=forms.Select(attrs={'class': 'form-control'}))
+    duration = forms.ChoiceField(label=_('Duration') + " (" + _("minutes") + ")", choices=[(15, '15'), (30, '30'), (45, '45'), (60, '60'), (90, '90'), (120, '120'), (180, '180'), (240, '240'), (300, '300'), (360, '360'), (420, '420'), (480, '480')], widget=forms.Select(attrs={'class': 'form-control'}))
