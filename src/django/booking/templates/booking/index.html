@@ -17,13 +17,13 @@
             <input type="date" name="expiry_date" id="expiry_date" aria-label="Date" value={{expiry_date}} required />
         </div>
     </div>
-    <input type="hidden" name="duration" id="duration"  value="30" />
+    <input type="hidden" name="duration" id="duration"  value="60" />
     
     <div role="group" class="button-group">
         <button type="button" class="secondary" data-value="15">15 min</button>
-        <button type="button" class="secondary" data-value="30" aria-current="true">30 min</button>
+        <button type="button" class="secondary" data-value="30">30 min</button>
         <button type="button" class="secondary" data-value="45">45 min</button>
-        <button type="button" class="secondary" data-value="60">60 min</button>
+        <button type="button" class="secondary" data-value="60" aria-current="true">60 min</button>
         <button type="button" class="secondary" data-value="90">90 min</button>
         <select name="duration_select" aria-label="Select" style="width: 20%" id="duration_select" on>
             <option selected disabled value="" >{%translate "Select other duration" %}</option>
