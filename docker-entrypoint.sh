@@ -23,7 +23,9 @@ if ! crontab -l | grep -q "*/5 * * * * bash /app/run_every5minutes.sh"; then
 fi
 chmod +x /app/run_every5minutes.sh
 # Save the $HOST environment variable for use in the cron job
-printenv | grep 'HOST' >> /etc/environment
+if ! grep -q 'HOST=' /etc/environment; then
+    echo "HOST=${HOST}" >> /etc/environment
+fi
 
 pip install --upgrade pip
 
