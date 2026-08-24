@@ -7,7 +7,7 @@ services:
       - ./src/django:/app
       - ./docker-entrypoint.sh:/docker-entrypoint.sh
       - static:/static
-    image: python:3.12-bullseye
+    image: python:3.12-bookworm
     entrypoint: sh /docker-entrypoint.sh
     environment:
       - SECRET_KEY=django-insecure-123
