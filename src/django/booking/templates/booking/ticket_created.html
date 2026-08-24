@@ -6,8 +6,23 @@
 <br>
 <br>
 <center>
-<h2>{%translate "Ticket created" %}</h2>
+<h2>{% if quantity > 1 %}{%translate "Tickets created" %}{% else %}{%translate "Ticket created" %}{% endif %}</h2>
 
+{% if quantity > 1 %}
+<strong>{%translate "Tickets created" %}:</strong> {{ quantity }}<br>
+<strong>{%translate "Earliest date for appointment" %}</strong> {{ticket.first_available_date}}<br>
+<strong>{%translate "Duration" %}:</strong> {{ticket.duration}}
+
+<br>
+<br>
+
+    {%translate "Send these links to the customers so that appointments can be made" %}:
+    <div style="text-align: left; width: fit-content; margin: auto;">
+        <code id="links_text" style="white-space: pre; display: block; padding: 1em; cursor: pointer; text-align: left;">{{ links_text }}</code>
+    </div>
+    <small id="message">{%translate "Click on the links to copy in the clipboard" %}</small>
+
+{% else %}
 <strong>{%translate "Description" %}:</strong> {{ticket.name}}<br>
 <strong>{%translate "Earliest date for appointment" %}</strong> {{ticket.first_available_date}}<br>
 <strong>{%translate "Duration" %}:</strong> {{ticket.duration}}
@@ -31,6 +46,8 @@
     <small id="message_invitation">{%translate "Click on the text to copy in the clipboard" %}</small>
     {% endif %}
 
+{% endif %}
+
 <br>
 <br>
 <br>
@@ -41,6 +58,16 @@
 
 <script>
 // Copy to clipboard
+{% if quantity > 1 %}
+document.getElementById('links_text').addEventListener('click', function(e) {
+    const text = this.textContent;
+    navigator.clipboard.writeText(text).then(() => {
+        document.getElementById('message').textContent = '{%translate "Links were copied into clipboard" %}!';
+    }).catch(err => {
+        console.error('Failed to copy: ', err);
+    });
+});
+{% else %}
 document.getElementById('link').style.cursor = 'pointer';
 document.getElementById('link').addEventListener('click', function(e) {
     e.preventDefault();
@@ -66,6 +93,7 @@ document.getElementById('invitation_text').addEventListener('click', function(e)
         console.error('Failed to copy: ', err);
     });
 });
+{% endif %}
 {% endif %}
 </script>
 

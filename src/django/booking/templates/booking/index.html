@@ -51,6 +51,9 @@
     <label for="recurring">{%translate "Recurring (this ticket will allow booking multiple appointments)" %}</label> <br>
     <input type="checkbox" name="recurring" id="recurring" value="on"/> <br> <br>
 
+    <label for="quantity">{%translate "Quantity" %}:</label>
+    <input type="number" name="quantity" id="quantity" value="1" min="1" max="100" required/> <br> <br>
+
     <input type="submit" value="{%translate "Create ticket" %}"/>
        
 </form>

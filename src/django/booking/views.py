@@ -33,20 +33,50 @@ def index(request):
         if generate_jitsi_link == "on":
             generate_jitsi_link = True
         duration = datetime.timedelta(minutes=int(request.POST["duration"]))
-        # Generate guid
-        guid = booking.calendar.generate_guid()
         if start_date == "" or expiry_date == "" or duration == "" or name == "":
             return templates.message(request, _("Error: Please fill out all fields"))
         recurring = request.POST.get("recurring", "") == "on"
-        ticket = Ticket(name=name, first_available_date=start_date, duration=duration, expiry=expiry_date, generate_jitsi_link=generate_jitsi_link, assigned_user=request.user, guid=guid, recurring=recurring)
-        ticket.save()
-        share_url = settings.BASE_URL + reverse("ticket_customer_view", args=[ticket.guid])
-        booking_settings = booking.booking.get_booking_settings_for_user(request.user)
-        if booking_settings.invitation_text:
-            invitation_text = booking_settings.invitation_text.replace("#BOOKING_LINK#", share_url).replace("#TICKET_NAME#", ticket.name)
+
+        try:
+            quantity = int(request.POST.get("quantity", "1"))
+        except ValueError:
+            quantity = 1
+        if quantity < 1:
+            quantity = 1
+        elif quantity > 100:
+            quantity = 100
+
+        if quantity > 1:
+            tickets_data = []
+            for i in range(1, quantity + 1):
+                guid = booking.calendar.generate_guid()
+                ticket_name = f"{name} {i}"
+                ticket = Ticket(name=ticket_name, first_available_date=start_date, duration=duration, expiry=expiry_date, generate_jitsi_link=generate_jitsi_link, assigned_user=request.user, guid=guid, recurring=recurring)
+                ticket.save()
+                share_url = settings.BASE_URL + reverse("ticket_customer_view", args=[ticket.guid])
+                tickets_data.append({
+                    "index": i,
+                    "share_url": share_url,
+                    "ticket": ticket
+                })
+            links_text = "\n".join([f"{item['index']}: {item['share_url']}" for item in tickets_data])
+            return render(request, "booking/ticket_created.html", {
+                "ticket": tickets_data[0]["ticket"],
+                "quantity": quantity,
+                "links_text": links_text,
+            })
         else:
-            invitation_text = ""
-        return render(request, "booking/ticket_created.html", {"ticket": ticket, "share_url": share_url, "invitation_text": invitation_text})
+            # Generate guid
+            guid = booking.calendar.generate_guid()
+            ticket = Ticket(name=name, first_available_date=start_date, duration=duration, expiry=expiry_date, generate_jitsi_link=generate_jitsi_link, assigned_user=request.user, guid=guid, recurring=recurring)
+            ticket.save()
+            share_url = settings.BASE_URL + reverse("ticket_customer_view", args=[ticket.guid])
+            booking_settings = booking.booking.get_booking_settings_for_user(request.user)
+            if booking_settings.invitation_text:
+                invitation_text = booking_settings.invitation_text.replace("#BOOKING_LINK#", share_url).replace("#TICKET_NAME#", ticket.name)
+            else:
+                invitation_text = ""
+            return render(request, "booking/ticket_created.html", {"ticket": ticket, "share_url": share_url, "invitation_text": invitation_text, "quantity": 1})
 
     booking.booking.delete_old_tickets()
     default_name = _("Ticket from") + " " + datetime.datetime.now().strftime("%d.%m.%Y %H:%M") + " " + _("APPENDIX_AFTER_TIME")
